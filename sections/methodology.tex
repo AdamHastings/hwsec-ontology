@@ -1,0 +1,132 @@
+\section{Formal Methods}
+\subsection{Methodological Goals}
+The methods section serves four goals: (1) make ontology construction
+reproducible, (2) justify modeling decisions as answers to explicit research
+questions, (3) define objective validation criteria, and (4) connect the
+resulting ontology to empirical analysis in hardware-security settings.
+
+\subsection{Ontology Engineering Process}
+We follow a competency-question-driven ontology workflow aligned with established
+ontology-engineering practice \cite{noy2001ontology,fernandez1997methontology}.
+The process has six stages:
+\begin{enumerate}
+  \item \textbf{Specification}: define scope, stakeholders, intended users, and non-goals.
+  \item \textbf{Knowledge acquisition}: collect terms, relations, and measurement concepts from hardware-security and security-economics literature.
+  \item \textbf{Conceptualization}: define core classes and relation patterns (for example, mechanism--cost, stakeholder--burden, and threat--impact).
+  \item \textbf{Formalization}: encode the model in OWL 2 with explicit object properties, data properties, and constraints.
+  \item \textbf{Implementation}: build a versioned machine-readable artifact (Turtle/RDF or OWL/XML) with example instances.
+  \item \textbf{Evaluation and iteration}: test queries, refine class boundaries, and resolve inconsistencies.
+\end{enumerate}
+
+\subsection{Competency Questions}
+Competency questions (CQs) define what the ontology must answer
+\cite{gruninger1995methodology}. Initial CQs for this paper are:
+\begin{itemize}
+  \item \textbf{CQ1}: Which stakeholders bear the direct and indirect costs of a given security mechanism?
+  \item \textbf{CQ2}: Which cost categories occur at design time versus deployment time versus incident time?
+  \item \textbf{CQ3}: For a given requirement, which costs are internalized versus externalized?
+  \item \textbf{CQ4}: Which mechanisms mitigate the same threat class but induce different cost distributions?
+  \item \textbf{CQ5}: Which observed incident losses can be mapped to missing or weakly adopted controls?
+\end{itemize}
+
+\subsection{CQ-to-Model Mapping}
+To make evaluation reproducible, each CQ is mapped to explicit conceptual
+elements in the ontology:
+\begin{itemize}
+  \item \textbf{CQ1} (who bears cost) maps to mechanism--cost--stakeholder relations.
+  \item \textbf{CQ2} (when costs occur) maps to cost-class and time-horizon modeling.
+  \item \textbf{CQ3} (internalized versus externalized burden) maps to requirement constraints, bearing-mode attributes, and cost-allocation relations.
+  \item \textbf{CQ4} (cross-mechanism comparison) maps to shared threat-mitigation links combined with stakeholder-time cost distributions and security posture (proactive/reactive/hybrid).
+  \item \textbf{CQ5} (incident loss linkage) is partially covered by threat-mitigation and failure-cost concepts; full coverage requires explicit incident-event classes in the next revision.
+\end{itemize}
+
+\subsection{Formalization and Semantics}
+The ontology will be represented in OWL 2 DL to support automated consistency
+checking while preserving sufficient expressiveness for class restrictions and
+property assertions. We separate:
+\begin{itemize}
+  \item \textbf{Structural concepts}: mechanism, stakeholder, threat, asset, requirement.
+  \item \textbf{Cost concepts}: cost type, magnitude, timing, uncertainty, and payer/beneficiary roles.
+  \item \textbf{Evidence concepts}: source type, confidence level, and measurement provenance.
+\end{itemize}
+To reduce taxonomic ambiguity, class hierarchies will be reviewed using
+OntoClean-style meta-properties (rigidity, identity, dependence) where
+applicable \cite{guarino2009ontoclean}.
+
+\subsection{Representative Axioms}
+To make formal commitments explicit, the current draft uses the following
+representative constraints:
+\begin{itemize}
+  \item \textbf{Disjointness}: \textit{ProactivePosture}, \textit{ReactivePosture}, and \textit{HybridPosture} are pairwise disjoint subclasses of \textit{SecurityPosture}.
+  \item \textbf{Participation}: every \textit{CostInstance} must have at least one bearer and one realization time.
+  \item \textbf{Typing}: values of \textit{hasActivationProfile} are restricted to \textit{AlwaysOn}, \textit{Conditional}, or \textit{EventTriggered}.
+  \item \textbf{Transfer semantics}: if a cost is marked \textit{externalized}, there exists a stakeholder distinct from the decision-maker that bears part of the burden.
+\end{itemize}
+
+In description-logic style, a minimal fragment is:
+\begin{equation}
+\begin{aligned}
+\textit{CostInstance} &\sqsubseteq \exists \textit{borneBy}.\textit{Stakeholder} \\
+\textit{CostInstance} &\sqsubseteq \exists \textit{realizedAt}.\textit{TimeHorizon} \\
+\textit{SecurityMechanism} &\sqsubseteq \exists \textit{hasSecurityPosture}.\textit{SecurityPosture}.
+\end{aligned}
+\end{equation}
+These axioms are intentionally lightweight in the draft and can be tightened in
+camera-ready versions after additional data mapping.
+
+\subsection{Validation Strategy}
+We evaluate the ontology against three criteria:
+\begin{enumerate}
+  \item \textbf{Logical validity}: ontology consistency and satisfiability under a DL reasoner.
+  \item \textbf{Question coverage}: whether CQs can be answered by executable queries.
+  \item \textbf{Analytical utility}: whether outputs support comparative assessments of hardware-security mechanisms across stakeholder-time matrices.
+\end{enumerate}
+For empirical grounding, we map case-study data into normalized tuples
+(\textit{mechanism}, \textit{cost type}, \textit{stakeholder}, \textit{time},
+\textit{evidence}) and perform sensitivity analysis when probabilities or loss
+magnitudes are uncertain.
+
+\subsection{Measurement Protocol}
+Each mapped cost instance includes a unit, uncertainty annotation, and evidence
+grade to improve reproducibility:
+\begin{itemize}
+  \item \textbf{Physical/resource metrics}: percent area, watts, performance delta, memory overhead.
+  \item \textbf{Labor/process metrics}: engineer-months, verification campaign size, patch turnaround time.
+  \item \textbf{Governance metrics}: audit effort hours, certification cycle length, compliance frequency.
+  \item \textbf{Loss metrics}: incident frequency, recovery cost, liability outlay, churn proxy.
+\end{itemize}
+
+Evidence quality is tracked with a three-level rubric:
+\begin{itemize}
+  \item \textbf{E1 (measured)}: benchmarked or operationally observed values.
+  \item \textbf{E2 (estimated)}: model-based interpolation/extrapolation.
+  \item \textbf{E3 (elicited)}: expert-judgment assumptions.
+\end{itemize}
+All reported comparisons state the proportion of E1/E2/E3 values and include a
+sensitivity range when E2 or E3 dominates.
+
+\subsection{Executable CQ Templates}
+To demonstrate question coverage, we use query templates over the
+machine-readable artifact:
+
+\begin{verbatim}
+# CQ1: Who bears costs for a given mechanism?
+SELECT ?stakeholder ?costType ?time WHERE {
+  ?m a ex:SecurityMechanism ; ex:label "AES accelerator" ;
+     ex:incurs ?c .
+  ?c ex:borneBy ?stakeholder ;
+     ex:hasCostType ?costType ;
+     ex:realizedAt ?time .
+}
+\end{verbatim}
+
+\begin{verbatim}
+# CQ4: Compare mechanisms mitigating the same threat
+SELECT ?m ?posture ?stakeholder ?costType WHERE {
+  ?m ex:mitigates ex:TransientExecutionThreat ;
+     ex:hasSecurityPosture ?posture ;
+     ex:incurs ?c .
+  ?c ex:borneBy ?stakeholder ;
+     ex:hasCostType ?costType .
+}
+\end{verbatim}

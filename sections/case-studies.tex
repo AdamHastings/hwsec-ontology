@@ -1,0 +1,46 @@
+\section{Evidence-Grounded Mechanism Cases}
+\subsection{Speculation Controls, TEEs, and Crypto Accelerators}
+This section instantiates the ontology with three mechanism families requested
+by our scope: speculation controls, trusted execution environments (TEEs), and
+cryptographic acceleration. Rather than hypothetical values, Table
+\ref{tab:worked-case} reports published measurements and maps each mechanism to
+posture, manifestation mode, and cost bearer.
+
+\begin{table*}[t]
+  \caption{Compact comparison of manifestation and burden using published measurements.}
+  \label{tab:worked-case}
+  \centering
+  \small
+  \begin{tabular}{p{0.16\textwidth}p{0.08\textwidth}p{0.10\textwidth}p{0.10\textwidth}p{0.20\textwidth}p{0.16\textwidth}p{0.10\textwidth}p{0.08\textwidth}}
+    \toprule
+    Mechanism family & Posture & Activation & Scope & Representative measured effect & System opportunity cost & Primary bearer & Dominant timing \\
+    \midrule
+    Speculation controls (Retbleed mitigations) & Proactive & Always-on or mode-dependent & System-wide & Reported UnixBench slowdown from 5.78\% to 27.90\% across tested CPU/mitigation configs \cite{retbleed2022} & Reduced speculative behavior can permanently trade peak throughput for attack-surface reduction & Operator + platform vendor & Recurring \\
+    TEE (Sanctum-style hardware isolation) & Proactive & Conditional (enclave entry/exit) with always-present hardware cost & Module/workload-specific & Per-core hardware overhead of +0.78\% gates and +1.9\% flip-flops; less than 3\% runtime overhead for most benchmarks with quarter LLC partition, but up to 23\% on memory-intensive workloads \cite{sanctum2016} & Capacity and cache partitioning can reduce non-enclave performance under contention & Chip vendor + integrator + operator & Upfront + recurring \\
+    Crypto accelerator (OpenTitan secure element) & Proactive & Conditional (crypto workload triggered) & Module/workload-specific & AES engine reports up to 44x speedup over software at 4KB payload; secure element occupies 1.7\,mm$^2$ within a 7.28\,mm$^2$ subsystem \cite{opentitan2024} & Area/power budget allocated to crypto and secure processing is unavailable for general-purpose cores or cache & Chip vendor + integrator & Upfront + recurring \\
+    \bottomrule
+  \end{tabular}
+\end{table*}
+
+\subsection{Interpretation Through RQ1--RQ4}
+For \textbf{RQ1}, the burden profile differs by family: speculation mitigations
+shift recurring cost to operators, while TEE and accelerator designs place large
+upfront burden on hardware and integration teams. For \textbf{RQ2}, the
+manifestation distinction is explicit: speculation controls are often always-on,
+TEE costs are mixed (fixed hardware plus conditional transitions), and
+accelerator gains are workload-triggered. For \textbf{RQ3}, opportunity-cost and
+externality pathways become visible when fixed silicon resources for security
+functions reduce alternative feature budgets. For \textbf{RQ4}, the ontology
+supports normalized cross-family comparison by encoding posture, activation,
+scope, bearer, and lifecycle timing in a shared schema.
+
+A complementary TEE software datapoint reinforces this distribution: Graphene-SGX
+reports performance from near-native up to less than 2x overhead for most
+single-process workloads, showing that software adaptation burden is highly
+workload-dependent even when hardware support is fixed \cite{graphenesgx2017}.
+
+\subsection{Dataset-Building Next Step}
+The next increment is to convert these seeded measurements into normalized
+tuples (\textit{mechanism}, \textit{cost type}, \textit{stakeholder},
+\textit{time}, \textit{magnitude}, \textit{evidence grade}) and extend coverage
+to at least 60 tuples across the same three families.

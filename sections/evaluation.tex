@@ -1,0 +1,61 @@
+\section{Evaluation Plan}
+\subsection{Evaluation Objectives}
+Evaluation addresses four questions: (1) is the ontology logically consistent,
+(2) can it answer RQ1--RQ4 through executable competency-question queries,
+(3) does it preserve distinctions that matter for hardware decisions, and
+(4) do outputs remain stable under uncertain inputs.
+
+\subsection{Logical and Reasoning Checks}
+We run OWL 2 DL reasoner checks over the ontology artifact and report:
+\begin{itemize}
+  \item consistency (no unsatisfiable classes),
+  \item coherence after adding case-study instances,
+  \item expected inferences (for example, derived burden paths from transfer relations).
+\end{itemize}
+A release candidate is considered valid only if all three checks pass.
+
+\subsection{Competency-Question Coverage}
+Each CQ is tested by at least one executable query and one manually reviewed
+result table. We report both binary coverage (answerable/not answerable) and
+answer quality (complete/partial/ambiguous).
+
+\begin{table}[t]
+  \caption{Planned CQ coverage report structure.}
+  \label{tab:cq-coverage}
+  \centering
+  \small
+  \begin{tabular}{p{0.10\textwidth}p{0.22\textwidth}p{0.13\textwidth}}
+    \toprule
+    CQ & Output expectation & Status in draft \\
+    \midrule
+    CQ1 & Stakeholder-specific burden decomposition & Partial \\
+    CQ2 & Lifecycle time allocation of costs & Partial \\
+    CQ3 & Internalized versus externalized burden map & Partial \\
+    CQ4 & Cross-mechanism comparison by shared threat class & Partial \\
+    CQ5 & Incident-loss linkage to missing controls & Planned \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\subsection{Analytical Utility Tests}
+Utility is tested with decision tasks that architecture and policy audiences
+care about:
+\begin{itemize}
+  \item compare two mechanisms with similar benchmark overhead but different burden transfer,
+  \item estimate who bears incremental compliance cost under a new requirement,
+  \item identify whether proactive and reactive control portfolios are balanced across lifecycle phases.
+\end{itemize}
+A utility pass requires that all tasks can be answered without adding ad hoc
+schema elements.
+
+\subsection{Sensitivity and Uncertainty}
+For uncertain values, we run one-way sensitivity sweeps on incident frequency,
+loss magnitude, and labor estimates. Reported conclusions must be robust across
+stated intervals; otherwise the output is marked decision-fragile.
+
+\subsection{Artifact Outputs}
+The evaluation package will include: ontology artifact, query scripts, mapped
+case-study tuples, and generated CQ result tables. This package is the primary
+reproducibility artifact for the paper. The initial release target is a
+three-family dataset covering speculation controls, TEEs, and crypto
+accelerators.

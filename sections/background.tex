@@ -1,0 +1,91 @@
+\section{Background and Related Work}
+\subsection{Cybersecurity Ontologies}
+Prior ontology efforts in cybersecurity have focused primarily on representing
+threat knowledge, incident semantics, and investigative workflows. These
+projects commonly model entities such as vulnerabilities, attacks, defensive
+techniques, indicators, and forensic artifacts, with the goal of improving
+interoperability and machine reasoning across tools and organizations
+\cite{syed2016uco,case2024,d3fend2026,nist2023unified}.
+
+This tradition provides useful methodological foundations for our work. First,
+it demonstrates how ontology design can bridge fragmented operational datasets.
+Second, it shows the value of explicit relation typing (for example,
+``mitigates,'' ``depends on,'' and ``caused by'') for downstream query and
+analysis. Third, it highlights recurring modeling tensions relevant to our
+setting: how to separate events from dispositions, how to encode uncertain
+evidence, and how to maintain stability as standards and attacker behavior
+evolve.
+
+However, most existing cybersecurity ontologies are not designed to represent
+economic burden in hardware development. Cost-bearing pathways, organizational
+constraints, and stakeholder transfer effects are usually peripheral rather
+than first-class concepts.
+
+\subsection{Hardware Security and Architecture Tradeoffs}
+Hardware-security research has produced extensive evidence that protections can
+impose measurable overhead in power, performance, die area, design complexity,
+or validation effort. Examples include trusted execution mechanisms
+\cite{costan2016intelsgx,graphenesgx2017,sanctum2016}, side-channel mitigations
+motivated by transient execution attacks \cite{kocher2019spectre,retbleed2022},
+and hardware cryptographic acceleration in secure SoC platforms
+\cite{opentitan2024}, in addition to broader hardware assurance practices
+\cite{tehranipoor2011hardware}.
+
+Yet this body of work tends to evaluate local technical impact rather than
+system-wide cost distribution. A published mechanism may report PPA overhead
+without explicitly modeling who bears integration cost, who receives risk
+reduction benefits, and which externalities remain. As a result, two mechanisms
+with similar benchmark overhead can have very different lifecycle economics once
+deployment, patching, compliance, and ecosystem effects are considered.
+
+\subsection{Security Economics, Governance, and Incentives}
+Security-economics research contributes concepts that are central for hardware:
+externalities, principal-agent misalignment, information asymmetry, and
+risk-shifting \cite{anderson2001economics,anderson2006economics,akerlof1970lemons}.
+These concepts explain why individually rational decisions by vendors,
+integrators, or platform operators may underinvest in controls with high social
+value, or overinvest in controls that serve compliance signaling more than
+actual risk reduction.
+
+Regulatory and assurance regimes add another layer. Certification, audit, and
+reporting requirements can improve baseline security but also introduce
+engineering overhead, schedule pressure, and documentation debt. These costs are
+not uniformly distributed, and they can alter product strategy and market
+structure, especially for smaller actors with limited compliance capacity.
+
+\subsection{Gap and Positioning of This Work}
+Existing ontology efforts in cybersecurity are mature in representing threats,
+incidents, and controls; existing hardware-security efforts are mature in
+quantifying mechanism-level technical overhead. What remains underdeveloped is a
+formal ontology that links these two traditions through explicit cost
+semantics: who pays, who benefits, when costs occur, and how residual risk is
+transferred.
+
+This paper positions the cost ontology as connective infrastructure across
+technical architecture analysis, organizational decision-making, and policy
+evaluation. Instead of treating overhead as a single scalar, we model security
+cost as a structured, stakeholder- and time-indexed object that can be queried,
+compared, and empirically validated.
+
+\subsection{Novelty Boundary Against Adjacent Ontologies}
+Table~\ref{tab:novelty-boundary} summarizes how this work relates to common
+security ontology and risk-modeling baselines. The intent is not to replace
+these models, but to add a missing cost-semantics layer that can interoperate
+with them.
+
+\begin{table*}[t]
+  \caption{Positioning of the proposed ontology against adjacent frameworks.}
+  \label{tab:novelty-boundary}
+  \centering
+  \small
+  \begin{tabular}{p{0.16\textwidth}p{0.22\textwidth}p{0.22\textwidth}p{0.30\textwidth}}
+    \toprule
+    Framework family & Primary focus & Typical omission for this problem & Contribution of this work \\
+    \midrule
+    Threat/control ontologies (for example UCO, CASE) & Cyber events, artifacts, incidents, and investigation semantics & Cost-bearing actor, timing of burden realization, and opportunity cost are not first-class & Adds explicit mechanism--cost--stakeholder--time representation for hardware design and operation \\
+    Defensive technique knowledge graphs (for example D3FEND) & Defensive technique catalog and relation to adversary behavior & Does not model full lifecycle burden allocation or externalities across organizations & Adds burden semantics that can map onto technique nodes for comparative evaluation \\
+    Cyber risk quantification models (for example FAIR-style) & Financial loss estimation and risk factors & Usually weak on hardware/microarchitectural mechanism representation and implementation cost decomposition & Adds engineering and architectural overhead classes tied to threat mitigation and deployment context \\
+    Hardware security evaluation papers & Mechanism-local PPA/performance/security measurements & Usually omit cross-stakeholder transfer, compliance burden, and post-incident cost pathways & Adds a shared schema to aggregate local measurements into system-level cost allocation \\
+    \bottomrule
+  \end{tabular}
+\end{table*}

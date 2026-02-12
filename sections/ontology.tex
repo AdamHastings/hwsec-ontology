@@ -1,0 +1,113 @@
+\section{Ontology of Security Costs}
+\subsection{Core Entities}
+\begin{itemize}
+  \item \textbf{Asset/Objectives}: performance, power, area, schedule, trust, safety, and revenue.
+  \item \textbf{Security Mechanism/Requirement}: technical controls and external mandates.
+  \item \textbf{Threat/Failure Mode}: exploit class, vulnerability type, attacker capability, and expected impact.
+  \item \textbf{Cost Type}: structured classes of burden with explicit definitions.
+  \item \textbf{Stakeholder}: who decides, who pays, who benefits, and who bears residual risk.
+  \item \textbf{Time Horizon}: design-time, validation-time, deployment-time, incident-time, and post-incident recovery.
+  \item \textbf{Evidence}: benchmark data, field incidents, audit artifacts, and expert elicitation.
+\end{itemize}
+
+\subsection{Core Relations}
+\begin{itemize}
+  \item Mechanism \emph{incurs} cost.
+  \item Cost is \emph{borne by} stakeholder.
+  \item Cost may be \emph{shifted to} a different stakeholder.
+  \item Cost is \emph{realized at} a time horizon.
+  \item Mechanism \emph{mitigates} threat.
+  \item Requirement \emph{constrains} design space.
+  \item Constraint \emph{induces} opportunity cost.
+  \item Incident \emph{causes} contingent and reputational losses.
+  \item Incentive misalignment \emph{shifts} costs across stakeholders.
+\end{itemize}
+
+\subsection{Cost Taxonomy}
+We define cost as any measurable reduction in technical, organizational,
+economic, or social objective value caused by adopting, operating, or omitting
+security controls. The ontology distinguishes the following cost classes:
+\begin{enumerate}
+  \item \textbf{Physical Resource Cost}: die area, static/dynamic power, latency, throughput, and memory overhead.
+  \item \textbf{Microarchitectural Performance Cost}: CPI increases, frequency reductions, and disabled speculative behaviors.
+  \item \textbf{Engineering Labor Cost}: architecture/design effort, RTL rework, firmware changes, and security review labor.
+  \item \textbf{Verification and Validation Cost}: formal proofs, simulation campaigns, emulation, test generation, and bug triage.
+  \item \textbf{Toolchain and Infrastructure Cost}: EDA licenses, CI hardening, fuzzing infrastructure, and secure build pipelines.
+  \item \textbf{Lifecycle Operations Cost}: key management, patch deployment, field support, secure update operations, and incident response.
+  \item \textbf{Compliance and Assurance Cost}: documentation, audits, certification, and recurring attestation obligations.
+  \item \textbf{Opportunity Cost}: schedule slip, delayed feature roadmap, lower SKU flexibility, and foregone market windows.
+  \item \textbf{Market and Contractual Cost}: warranty exposure, insurance premiums, indemnification terms, and procurement penalties.
+  \item \textbf{Reputation and Trust Cost}: customer churn, reduced adoption, investor confidence loss, and long-tail brand damage.
+  \item \textbf{Liability and Redress Cost}: legal defense, settlements, recalls, regulatory fines, and remediation programs.
+  \item \textbf{Externality Cost}: harms imposed on non-deciding parties, including downstream operators, end users, and public infrastructure.
+\end{enumerate}
+
+\subsection{Cost-Bearing Dimensions}
+Each instantiated cost in the ontology is annotated along four dimensions:
+\begin{itemize}
+  \item \textbf{Bearer}: vendor, integrator/OEM, cloud operator, enterprise customer, end user, regulator/public.
+  \item \textbf{Timing}: upfront, recurring, contingent, or deferred.
+  \item \textbf{Bearing Mode}: internalized, transferred by contract, insured, or externalized.
+  \item \textbf{Evidence Type}: measured, estimated, or expert-elicited.
+\end{itemize}
+
+This representation allows the same mechanism to carry different burden profiles
+across deployment contexts even when technical overhead appears similar.
+
+\subsection{Cost Manifestation Modes}
+In addition to ``who pays,'' the ontology tracks \emph{how} costs manifest in
+operation:
+\begin{itemize}
+  \item \textbf{Activation Profile}: always-on, conditional, or event-triggered cost realization.
+  \item \textbf{Scope}: system-wide versus module/workload-specific manifestation.
+  \item \textbf{Workload Interaction}: whether the mechanism improves, degrades, or redistributes performance across workload classes.
+  \item \textbf{Counterfactual Opportunity Cost}: what alternative capability could have been implemented with the same area/power/budget.
+\end{itemize}
+
+This distinction is important for mechanisms with mixed effects. For example, a
+protection with near-constant overhead (for example, broad randomization
+features) is modeled as always-on and wide-scope, while a dedicated crypto block
+may accelerate cryptographic workloads but still induce system-level opportunity
+cost by consuming resources that could otherwise support general-purpose
+performance.
+
+\subsection{Security Posture: Proactive vs Reactive}
+The ontology also classifies mechanisms by security posture:
+\begin{itemize}
+  \item \textbf{Proactive}: mechanisms that reduce exploitability before compromise, typically via prevention or hardening.
+  \item \textbf{Reactive}: mechanisms that detect, contain, or recover from compromise after or during attack execution.
+  \item \textbf{Hybrid}: mechanisms with both proactive and reactive components.
+\end{itemize}
+
+Posture affects cost incidence. Proactive controls often concentrate burden in
+upfront design and recurring overhead, while reactive controls can shift burden
+toward monitoring operations, incident-time response, and post-incident recovery.
+Modeling posture alongside activation profile and scope helps separate
+``preventive cost'' from ``response cost'' in cross-mechanism comparisons.
+
+\subsection{Initial Cost-Bearing Matrix}
+Table~\ref{tab:cost-bearing-matrix} summarizes representative burden patterns
+that the ontology is designed to capture and query.
+
+\begin{table*}[t]
+  \caption{Illustrative cost-bearing matrix by stakeholder and time horizon.}
+  \label{tab:cost-bearing-matrix}
+  \centering
+  \small
+  \begin{tabular}{p{0.17\textwidth}p{0.11\textwidth}p{0.11\textwidth}p{0.11\textwidth}p{0.40\textwidth}}
+    \toprule
+    Stakeholder & Upfront & Recurring & Contingent & Typical burden classes \\
+    \midrule
+    Chip vendor & High & Medium & Medium & Physical resource, engineering labor, verification and validation \\
+    OEM/integrator & Medium & Medium & Medium & Integration overhead, compliance burden, lifecycle operations \\
+    Cloud operator & Medium & High & High & Performance overhead, recurring operations, incident response \\
+    Enterprise customer & Low & Medium & High & Migration effort, downtime risk, contractual and liability exposure \\
+    End user/public & Low & Low & High & Service degradation, privacy harms, and externalized impacts \\
+    \bottomrule
+  \end{tabular}
+\end{table*}
+
+\subsection{Machine-Readable Representation}
+The formal class/property encoding of this taxonomy is maintained in the
+companion artifact released with the paper materials, which provides canonical
+definitions for cost classes, stakeholder roles, and burden relations.

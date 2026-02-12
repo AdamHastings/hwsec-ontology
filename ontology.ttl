@@ -1,0 +1,199 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex: <https://example.org/hwsec-cost-ontology#> .
+
+ex:HardwareSecurityCostOntology a owl:Ontology ;
+  rdfs:label "Hardware Security Cost Ontology" ;
+  rdfs:comment "A starter ontology for modeling security cost incidence in hardware and architecture." .
+
+# Core classes
+ex:SecurityMechanism a owl:Class .
+ex:Threat a owl:Class .
+ex:Requirement a owl:Class .
+ex:Stakeholder a owl:Class .
+ex:Cost a owl:Class .
+ex:CostType a owl:Class .
+ex:TimeHorizon a owl:Class .
+ex:BearingMode a owl:Class .
+ex:EvidenceType a owl:Class .
+ex:ActivationProfile a owl:Class .
+ex:ScopeType a owl:Class .
+ex:WorkloadInteraction a owl:Class .
+ex:SecurityPosture a owl:Class .
+
+# Cost taxonomy
+ex:PhysicalResourceCost a owl:Class ; rdfs:subClassOf ex:CostType .
+ex:MicroarchitecturalPerformanceCost a owl:Class ; rdfs:subClassOf ex:CostType .
+ex:EngineeringLaborCost a owl:Class ; rdfs:subClassOf ex:CostType .
+ex:VerificationValidationCost a owl:Class ; rdfs:subClassOf ex:CostType .
+ex:ToolchainInfrastructureCost a owl:Class ; rdfs:subClassOf ex:CostType .
+ex:LifecycleOperationsCost a owl:Class ; rdfs:subClassOf ex:CostType .
+ex:ComplianceAssuranceCost a owl:Class ; rdfs:subClassOf ex:CostType .
+ex:OpportunityCost a owl:Class ; rdfs:subClassOf ex:CostType .
+ex:MarketContractualCost a owl:Class ; rdfs:subClassOf ex:CostType .
+ex:ReputationTrustCost a owl:Class ; rdfs:subClassOf ex:CostType .
+ex:LiabilityRedressCost a owl:Class ; rdfs:subClassOf ex:CostType .
+ex:ExternalityCost a owl:Class ; rdfs:subClassOf ex:CostType .
+
+# Stakeholder taxonomy
+ex:ChipVendor a owl:Class ; rdfs:subClassOf ex:Stakeholder .
+ex:OEMIntegrator a owl:Class ; rdfs:subClassOf ex:Stakeholder .
+ex:CloudOperator a owl:Class ; rdfs:subClassOf ex:Stakeholder .
+ex:EnterpriseCustomer a owl:Class ; rdfs:subClassOf ex:Stakeholder .
+ex:EndUser a owl:Class ; rdfs:subClassOf ex:Stakeholder .
+ex:RegulatorPublic a owl:Class ; rdfs:subClassOf ex:Stakeholder .
+
+# Time horizon taxonomy
+ex:Upfront a owl:Class ; rdfs:subClassOf ex:TimeHorizon .
+ex:Recurring a owl:Class ; rdfs:subClassOf ex:TimeHorizon .
+ex:Contingent a owl:Class ; rdfs:subClassOf ex:TimeHorizon .
+ex:Deferred a owl:Class ; rdfs:subClassOf ex:TimeHorizon .
+
+# Bearing mode taxonomy
+ex:Internalized a owl:Class ; rdfs:subClassOf ex:BearingMode .
+ex:Transferred a owl:Class ; rdfs:subClassOf ex:BearingMode .
+ex:Insured a owl:Class ; rdfs:subClassOf ex:BearingMode .
+ex:Externalized a owl:Class ; rdfs:subClassOf ex:BearingMode .
+
+# Evidence type taxonomy
+ex:MeasuredEvidence a owl:Class ; rdfs:subClassOf ex:EvidenceType .
+ex:EstimatedEvidence a owl:Class ; rdfs:subClassOf ex:EvidenceType .
+ex:ExpertElicitedEvidence a owl:Class ; rdfs:subClassOf ex:EvidenceType .
+
+# Cost manifestation taxonomy
+ex:AlwaysOnActivation a owl:Class ; rdfs:subClassOf ex:ActivationProfile .
+ex:ConditionalActivation a owl:Class ; rdfs:subClassOf ex:ActivationProfile .
+ex:EventTriggeredActivation a owl:Class ; rdfs:subClassOf ex:ActivationProfile .
+
+ex:SystemWideScope a owl:Class ; rdfs:subClassOf ex:ScopeType .
+ex:ModuleSpecificScope a owl:Class ; rdfs:subClassOf ex:ScopeType .
+ex:WorkloadSpecificScope a owl:Class ; rdfs:subClassOf ex:ScopeType .
+
+ex:ImprovesTargetWorkload a owl:Class ; rdfs:subClassOf ex:WorkloadInteraction .
+ex:DegradesGeneralWorkload a owl:Class ; rdfs:subClassOf ex:WorkloadInteraction .
+ex:MixedWorkloadInteraction a owl:Class ; rdfs:subClassOf ex:WorkloadInteraction .
+
+# Security posture taxonomy
+ex:ProactivePosture a owl:Class ; rdfs:subClassOf ex:SecurityPosture .
+ex:ReactivePosture a owl:Class ; rdfs:subClassOf ex:SecurityPosture .
+ex:HybridPosture a owl:Class ; rdfs:subClassOf ex:SecurityPosture .
+
+# Core properties
+ex:incursCost a owl:ObjectProperty ;
+  rdfs:domain ex:SecurityMechanism ;
+  rdfs:range ex:Cost .
+
+ex:hasCostType a owl:ObjectProperty ;
+  rdfs:domain ex:Cost ;
+  rdfs:range ex:CostType .
+
+ex:borneBy a owl:ObjectProperty ;
+  rdfs:domain ex:Cost ;
+  rdfs:range ex:Stakeholder .
+
+ex:shiftedTo a owl:ObjectProperty ;
+  rdfs:domain ex:Cost ;
+  rdfs:range ex:Stakeholder .
+
+ex:realizedAt a owl:ObjectProperty ;
+  rdfs:domain ex:Cost ;
+  rdfs:range ex:TimeHorizon .
+
+ex:hasBearingMode a owl:ObjectProperty ;
+  rdfs:domain ex:Cost ;
+  rdfs:range ex:BearingMode .
+
+ex:hasEvidenceType a owl:ObjectProperty ;
+  rdfs:domain ex:Cost ;
+  rdfs:range ex:EvidenceType .
+
+ex:hasActivationProfile a owl:ObjectProperty ;
+  rdfs:domain ex:Cost ;
+  rdfs:range ex:ActivationProfile .
+
+ex:hasScopeType a owl:ObjectProperty ;
+  rdfs:domain ex:Cost ;
+  rdfs:range ex:ScopeType .
+
+ex:hasWorkloadInteraction a owl:ObjectProperty ;
+  rdfs:domain ex:Cost ;
+  rdfs:range ex:WorkloadInteraction .
+
+ex:hasCounterfactualAlternative a owl:ObjectProperty ;
+  rdfs:domain ex:Cost ;
+  rdfs:range ex:Cost .
+
+ex:hasSecurityPosture a owl:ObjectProperty ;
+  rdfs:domain ex:SecurityMechanism ;
+  rdfs:range ex:SecurityPosture .
+
+ex:mitigatesThreat a owl:ObjectProperty ;
+  rdfs:domain ex:SecurityMechanism ;
+  rdfs:range ex:Threat .
+
+ex:constrainsDesignSpace a owl:ObjectProperty ;
+  rdfs:domain ex:Requirement ;
+  rdfs:range ex:SecurityMechanism .
+
+# Optional quantitative attributes
+ex:costValue a owl:DatatypeProperty ;
+  rdfs:domain ex:Cost ;
+  rdfs:range xsd:decimal .
+
+ex:costUnit a owl:DatatypeProperty ;
+  rdfs:domain ex:Cost ;
+  rdfs:range xsd:string .
+
+# Example individuals
+ex:SpeculationBarrier a ex:SecurityMechanism .
+ex:TransientExecutionAttack a ex:Threat .
+ex:SpeculationBarrier ex:mitigatesThreat ex:TransientExecutionAttack .
+ex:SpeculationBarrier ex:hasSecurityPosture ex:ProactivePostureExample .
+
+ex:SpeculationBarrierPerfCost a ex:Cost ;
+  ex:hasCostType ex:MicroarchitecturalPerformanceCost ;
+  ex:borneBy ex:CloudOperatorExample ;
+  ex:realizedAt ex:RecurringExample ;
+  ex:hasBearingMode ex:InternalizedExample ;
+  ex:hasEvidenceType ex:MeasuredEvidenceExample ;
+  ex:hasActivationProfile ex:AlwaysOnActivationExample ;
+  ex:hasScopeType ex:SystemWideScopeExample ;
+  ex:hasWorkloadInteraction ex:DegradesGeneralWorkloadExample .
+
+ex:AesAccelerator a ex:SecurityMechanism .
+ex:AesAccelerator ex:hasSecurityPosture ex:ProactivePostureExample .
+ex:AesWorkloadCost a ex:Cost ;
+  ex:hasCostType ex:PhysicalResourceCost ;
+  ex:borneBy ex:ChipVendorExample ;
+  ex:realizedAt ex:UpfrontExample ;
+  ex:hasBearingMode ex:InternalizedExample ;
+  ex:hasActivationProfile ex:ConditionalActivationExample ;
+  ex:hasScopeType ex:ModuleSpecificScopeExample ;
+  ex:hasWorkloadInteraction ex:MixedWorkloadInteractionExample ;
+  ex:hasCounterfactualAlternative ex:GeneralComputeOpportunityCost .
+
+ex:GeneralComputeOpportunityCost a ex:Cost ;
+  ex:hasCostType ex:OpportunityCost ;
+  ex:borneBy ex:EnterpriseCustomerExample ;
+  ex:realizedAt ex:RecurringExample ;
+  ex:hasBearingMode ex:InternalizedExample .
+
+ex:CloudOperatorExample a ex:CloudOperator .
+ex:ChipVendorExample a ex:ChipVendor .
+ex:EnterpriseCustomerExample a ex:EnterpriseCustomer .
+ex:UpfrontExample a ex:Upfront .
+ex:RecurringExample a ex:Recurring .
+ex:InternalizedExample a ex:Internalized .
+ex:MeasuredEvidenceExample a ex:MeasuredEvidence .
+ex:AlwaysOnActivationExample a ex:AlwaysOnActivation .
+ex:ConditionalActivationExample a ex:ConditionalActivation .
+ex:SystemWideScopeExample a ex:SystemWideScope .
+ex:ModuleSpecificScopeExample a ex:ModuleSpecificScope .
+ex:DegradesGeneralWorkloadExample a ex:DegradesGeneralWorkload .
+ex:MixedWorkloadInteractionExample a ex:MixedWorkloadInteraction .
+ex:ProactivePostureExample a ex:ProactivePosture .
+
+ex:SpeculationBarrier ex:incursCost ex:SpeculationBarrierPerfCost .
+ex:AesAccelerator ex:incursCost ex:AesWorkloadCost .

@@ -1,0 +1,68 @@
+\documentclass[sigconf]{acmart}
+
+\usepackage{amsmath}
+\usepackage{booktabs}
+
+\setcopyright{none}
+\settopmatter{printfolios=true}
+\acmDOI{}
+\acmISBN{}
+\acmConference[Draft '26]{Draft Submission}{2026}{TBD}
+\acmBooktitle{Draft Submission (2026)}
+
+\title{The Cost of Security in Computer Hardware and Architecture: A Draft Ontology and Research Agenda}
+
+\author{Author Name}
+\affiliation{%
+  \institution{Affiliation}
+  \city{City}
+  \country{Country}
+}
+\email{email@example.com}
+
+\begin{document}
+\begin{abstract}
+Security in hardware and computer architecture is often treated as a feature,
+but in practice it manifests as a portfolio of costs: power, performance, die
+area, engineering effort, compliance overhead, schedule delay, and downstream
+reputational or market losses when failures occur. This draft paper proposes an
+ontology for these costs and sketches a framework for comparing security
+investments across stakeholders and timescales.
+\end{abstract}
+
+\maketitle
+
+\begin{CCSXML}
+<ccs2012>
+<concept>
+<concept_id>10002978.10003022.10003023</concept_id>
+<concept_desc>Security and privacy~Embedded systems security</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+<concept>
+<concept_id>10002978.10003022.10003036</concept_id>
+<concept_desc>Security and privacy~Systems security</concept_desc>
+<concept_significance>300</concept_significance>
+</concept>
+</ccs2012>
+\end{CCSXML}
+\ccsdesc[500]{Security and privacy~Embedded systems security}
+\ccsdesc[300]{Security and privacy~Systems security}
+
+\keywords{hardware security, ontology, security economics, computer architecture, risk transfer}
+
+\input{sections/introduction}
+\input{sections/scope}
+\input{sections/background}
+\input{sections/ontology}
+\input{sections/analytical-framework}
+\input{sections/case-studies}
+\input{sections/methodology}
+\input{sections/evaluation}
+\input{sections/discussion}
+\input{sections/conclusion}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{refs}
+
+\end{document}
