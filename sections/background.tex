@@ -1,4 +1,20 @@
 \section{Background and Related Work}
+\subsection{Ontology Primer for Hardware Security Readers}
+Because ontology language can be unfamiliar outside knowledge-representation
+communities, we fix terminology up front. A \textbf{class} denotes a category
+(for example, \textit{SecurityMechanism}, \textit{Stakeholder},
+\textit{Cost}); an \textbf{individual} denotes a concrete instance (for
+example, a specific TEE deployment cost entry); a \textbf{property} denotes a
+typed relation between instances (for example, mechanism \emph{incurs} cost and
+cost \emph{borne by} stakeholder); an \textbf{axiom} denotes a constraint (for
+example, every cost entry specifies at least one bearer and one time horizon);
+and a \textbf{reasoner} denotes an automated checker that validates constraints
+and derives implied facts.
+Operationally, this is similar to maintaining a strongly typed schema plus
+integrity constraints, then running consistency checks and canned analytical
+queries. We use ontology tooling because we need explicit semantics for
+cross-stakeholder and cross-time reasoning, not only tabular storage.
+
 \subsection{Cybersecurity Ontologies}
 Prior ontology efforts in cybersecurity have focused primarily on representing
 threat knowledge, incident semantics, and investigative workflows. These
@@ -26,10 +42,10 @@ Hardware-security research has produced extensive evidence that protections can
 impose measurable overhead in power, performance, die area, design complexity,
 or validation effort. Examples include trusted execution mechanisms
 \cite{costan2016intelsgx,graphenesgx2017,sanctum2016}, side-channel mitigations
-motivated by transient execution attacks \cite{kocher2019spectre,retbleed2022},
+motivated by transient execution attacks \cite{kocher2019spectre,retbleed2022,invisispec2018},
 and hardware cryptographic acceleration in secure SoC platforms
-\cite{opentitan2024}, in addition to broader hardware assurance practices
-\cite{tehranipoor2011hardware}.
+\cite{opentitan2024,intel_aesni2012,intel_xeon_crypto2017}, in addition to
+broader hardware assurance practices \cite{tehranipoor2011hardware}.
 
 Yet this body of work tends to evaluate local technical impact rather than
 system-wide cost distribution. A published mechanism may report PPA overhead
@@ -89,3 +105,7 @@ with them.
     \bottomrule
   \end{tabular}
 \end{table*}
+
+Taken together, this boundary analysis motivates the next section's explicit
+class and relation design: the contribution is not a replacement for threat or
+risk ontologies, but a cost-semantics layer that can interoperate with them.

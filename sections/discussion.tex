@@ -1,28 +1,54 @@
 \section{Discussion}
-\subsection{Policy and Regulation}
-Regulatory requirements can reduce social risk while increasing localized
-industry burden; the ontology helps identify when these interventions are
-productive versus distortionary.
+\subsection{Normative and Political Assumptions}
+The framework is not value-neutral. It assumes that hidden burden transfer is a
+problem worth exposing and that decision-makers should justify who bears
+security costs. In practice, this is a governance stance: technical mechanism
+selection is treated as a distributional choice, not only an engineering one.
 
-\subsection{Design Implications}
-Architects should evaluate security features by system-level welfare impact,
-not only local PPA or benchmark metrics.
+\subsection{Implications for Regulation and Procurement}
+Regulatory requirements can reduce social risk while increasing localized
+industry burden. The ontology helps distinguish productive interventions from
+distortionary ones by showing whether burdens are internalized by decision-makers
+or shifted downstream. Procurement and assurance processes can use the same
+representation to request burden-allocation disclosures, not only benchmark
+overhead claims.
+
+\subsection{Objections and Responses}
+Three objections are anticipated. First, one may argue that local
+PPA/performance metrics are sufficient for mechanism choice; this holds only
+when transfer and externality terms are negligible, which the case studies do
+not support. Second, one may argue that burden weighting is subjective and
+therefore arbitrary; in practice, subjectivity remains even when implicit, and
+explicit weighting makes disagreement inspectable. Third, one may argue that
+ontology complexity outweighs practical benefit; the intended use is targeted
+decision support in settings where hidden transfer is likely, not replacement of
+lightweight benchmarking in all contexts.
+
+\subsection{Falsifiability and Failure Modes}
+The paradigm should be rejected if allocation-aware reasoning fails to produce
+decision deltas in realistic settings, if transfer/externality pathways are
+empirically negligible, or if uncertainty disclosure does not improve decision
+robustness. This paper provides initial evidence, not a final proof, so these
+failure conditions remain active tests for future work.
 
 \subsection{Limitations}
-This draft still has three major limitations: limited measured hardware data,
-incomplete incident-loss mapping, and dependence on mixed evidence quality.
+This version has three major limitations: limited measured hardware breadth,
+seed-level (not benchmark-grade) incident linkage, and dependence on mixed
+evidence quality.
 
 \subsection{Threats to Validity}
-\begin{itemize}
-  \item \textbf{Selection bias}: published mechanisms over-represent successful or benchmark-friendly designs.
-  \item \textbf{Measurement heterogeneity}: area, power, and performance numbers are often reported under incompatible assumptions.
-  \item \textbf{Attribution ambiguity}: incident losses may be multi-causal and difficult to map to one missing control.
-  \item \textbf{Private-cost opacity}: legal, contract, and response costs are frequently proprietary.
-\end{itemize}
+Threats to validity include selection bias (published mechanisms may
+over-represent successful or benchmark-friendly designs), measurement
+heterogeneity (area, power, and performance values are often reported under
+incompatible assumptions), attribution ambiguity (incident losses may be
+multi-causal), and private-cost opacity (legal, contractual, and response costs
+are frequently proprietary).
 These risks are mitigated by explicit evidence grading, sensitivity analysis,
 and by reporting uncertainty intervals alongside point estimates.
 
 \subsection{Bibliographic and Dataset Maturity}
-The current draft cites representative prior work, but a camera-ready version
+The current paper cites representative prior work, but a stronger submission
 requires a more systematic corpus review and a source-complete benchmark table
-for all numeric claims.
+for all numeric claims. The current executable corpus should be treated as a
+seed baseline for protocol validation, not yet as community benchmark ground
+truth.

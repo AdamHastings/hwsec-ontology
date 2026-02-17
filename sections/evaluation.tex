@@ -1,61 +1,99 @@
-\section{Evaluation Plan}
-\subsection{Evaluation Objectives}
-Evaluation addresses four questions: (1) is the ontology logically consistent,
-(2) can it answer RQ1--RQ4 through executable competency-question queries,
-(3) does it preserve distinctions that matter for hardware decisions, and
-(4) do outputs remain stable under uncertain inputs.
+\section{Evaluation Results}
+\subsection{Executed Workflow}
+The current release was evaluated using seven artifacts:
+\path{ontology.ttl}, \path{artifacts/cost_tuples.csv},
+\path{artifacts/incident_tuples.csv}, \path{artifacts/cq_queries.sparql},
+\path{artifacts/cq_results.csv}, \path{artifacts/voi_priorities.csv}, and
+\path{artifacts/sensitivity_rankings.csv}. We regenerate CQ outputs from data
+with \texttt{scripts/generate\_cq\_results.py} and then run integrity and
+distribution checks via \texttt{make repro}.
 
-\subsection{Logical and Reasoning Checks}
-We run OWL 2 DL reasoner checks over the ontology artifact and report:
-\begin{itemize}
-  \item consistency (no unsatisfiable classes),
-  \item coherence after adding case-study instances,
-  \item expected inferences (for example, derived burden paths from transfer relations).
-\end{itemize}
-A release candidate is considered valid only if all three checks pass.
+\subsection{Artifact Integrity Results}
+The seed cost dataset contains 120 tuples across six mechanism families (20 per
+family) with no missing values in key analysis fields (family, cost type, time
+horizon, bearing mode, evidence grade, data origin, source key, source
+locator). Distribution is: 59 E1, 39 E2, and 22 E3 rows; 59 Measured, 39
+Inferred, and 22 Synthetic rows; 54 upfront, 60 recurring, 4 contingent, and 2
+deferred rows; 66 internalized, 34 transferred, and 20 externalized rows.
 
-\subsection{Competency-Question Coverage}
-Each CQ is tested by at least one executable query and one manually reviewed
-result table. We report both binary coverage (answerable/not answerable) and
-answer quality (complete/partial/ambiguous).
+Incident linkage contains 12 tuples with complete family-linked loss,
+confidence, and provenance fields (8 E2/Inferred and 4 E3/Synthetic).
+
+\subsection{Competency-Question Coverage Results}
+All six CQs are executable in the current release through generated artifacts.
+CQ4 and CQ6 moved from partial to pass because incident-linkage tuples and VOI
+ranking are now part of the artifact pipeline.
 
 \begin{table}[t]
-  \caption{Planned CQ coverage report structure.}
+  \caption{Observed CQ coverage results from executable artifacts.}
   \label{tab:cq-coverage}
   \centering
-  \small
-  \begin{tabular}{p{0.10\textwidth}p{0.22\textwidth}p{0.13\textwidth}}
+  \footnotesize
+  \setlength{\tabcolsep}{3pt}
+  \begin{tabular}{p{0.18\columnwidth}p{0.10\columnwidth}p{0.60\columnwidth}}
     \toprule
-    CQ & Output expectation & Status in draft \\
+    CQ & Status & Coverage metric \\
     \midrule
-    CQ1 & Stakeholder-specific burden decomposition & Partial \\
-    CQ2 & Lifecycle time allocation of costs & Partial \\
-    CQ3 & Internalized versus externalized burden map & Partial \\
-    CQ4 & Cross-mechanism comparison by shared threat class & Partial \\
-    CQ5 & Incident-loss linkage to missing controls & Planned \\
+    CQ1 (visibility) & Pass & 120/120 tuples include bearer, time, unit, evidence, data origin, and source provenance. \\
+    CQ2 (transfer) & Pass & 120/120 tuples include bearing mode (Externalized=20). \\
+    CQ3 (comparison) & Pass & 6/6 families satisfy shared comparability criteria. \\
+    CQ4 (attribution) & Pass & 12/12 incident tuples include family-linked loss, confidence, and provenance. \\
+    CQ5 (sensitivity) & Pass & Family ranking stable under $\pm20\%$ E2/E3 perturbation. \\
+    CQ6 (information gap) & Pass & VOI priorities computed for 40 family-cost cells. \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-\subsection{Analytical Utility Tests}
-Utility is tested with decision tasks that architecture and policy audiences
-care about:
-\begin{itemize}
-  \item compare two mechanisms with similar benchmark overhead but different burden transfer,
-  \item estimate who bears incremental compliance cost under a new requirement,
-  \item identify whether proactive and reactive control portfolios are balanced across lifecycle phases.
-\end{itemize}
-A utility pass requires that all tasks can be answered without adding ad hoc
-schema elements.
+\subsection{RQ1--RQ4 Answer Summary}
+Table~\ref{tab:rq-summary} reports direct answers to RQ1--RQ4 with explicit
+seed-corpus scope.
 
-\subsection{Sensitivity and Uncertainty}
-For uncertain values, we run one-way sensitivity sweeps on incident frequency,
-loss magnitude, and labor estimates. Reported conclusions must be robust across
-stated intervals; otherwise the output is marked decision-fragile.
+\begin{table*}[t]
+  \caption{Direct answers to RQ1--RQ4 with evidence anchors in the current seed release.}
+  \label{tab:rq-summary}
+  \centering
+  \small
+  \begin{tabular}{p{0.07\textwidth}p{0.44\textwidth}p{0.41\textwidth}}
+    \toprule
+    RQ & Answer from current results & Evidence anchor \\
+    \midrule
+    RQ1 & Security mechanisms induce heterogeneous burden classes across lifecycle phases, not a single scalar overhead. & 120 tuples spanning physical, performance, labor, operations, compliance, strategic, and externality costs across upfront/recurring/contingent/deferred horizons. \\
+    RQ2 & A usable representation requires bearer, time horizon, bearing mode, evidence grade, data origin, and source provenance per row. & Complete field coverage in \texttt{cost\_tuples.csv} with executable CQ1--CQ2 checks. \\
+    RQ3 & Transfer and externality semantics are necessary to model incentive misalignment in hardware-security choice. & 34 transferred and 20 externalized tuples; decision-delta examples where local-performance and allocation-aware choices diverge. \\
+    RQ4 & Cross-family comparison is feasible when families share posture, activation, scope, and burden schema. & CQ3 pass across six families, including one reactive family, on a shared burden representation. \\
+    \bottomrule
+  \end{tabular}
+\end{table*}
 
-\subsection{Artifact Outputs}
-The evaluation package will include: ontology artifact, query scripts, mapped
-case-study tuples, and generated CQ result tables. This package is the primary
-reproducibility artifact for the paper. The initial release target is a
-three-family dataset covering speculation controls, TEEs, and crypto
-accelerators.
+\subsection{Decision-Delta and Reactive Coverage}
+Compared with prior proactive-only coverage, the reactive
+runtime-detection/response family adds contingent and deferred burden channels.
+This enables explicit proactive-versus-reactive portfolio discussion in the same
+schema, instead of treating posture as a descriptive label only.
+
+\subsection{Sensitivity Results (CQ5)}
+Microarchitectural performance ranking was stable across baseline and
+$\pm20\%$ perturbations of E2/E3 values:
+CryptoAccelerators, RuntimeDetectionResponse, MemorySafetyMitigations,
+RowhammerMitigations, TrustedExecutionEnvironments, SpeculationControls.
+This result is generated and recorded in
+\texttt{artifacts/sensitivity\_rankings.csv}.
+
+\subsection{VOI Results (CQ6)}
+The VOI pipeline ranks high-value measurement gaps by uncertainty, transfer, and
+incident linkage. Top-ranked cells in the current seed release include
+RuntimeDetectionResponse/ReputationTrustCost and transfer-heavy crypto,
+rowhammer, and memory-safety cells. Full ranking is emitted to
+\texttt{artifacts/voi\_priorities.csv}.
+
+\subsection{Calibration of Claims}
+These results establish methodological execution, not final empirical
+ground truth. The corpus remains a seed dataset with mixed measured and
+inferred/synthetic rows, so conclusions should be read as demonstrating
+decision visibility and queryability rather than definitive market-level
+effect sizes.
+
+\subsection{Reproducibility Outputs}
+Running \texttt{make repro} regenerates CQ/VOI/sensitivity artifacts and writes
+\texttt{artifacts/repro\_report.txt} with tuple counts, distribution checks, and
+CQ status summaries used in this section.

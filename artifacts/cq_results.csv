@@ -1,0 +1,7 @@
+cq_id,status,coverage_metric,notes
+CQ1,pass,120/120 tuples include stakeholder + time + magnitude + unit + evidence + data_origin + source_key + source_locator,"Cost visibility by bearer, horizon, and row-level provenance is executable"
+CQ2,pass,120/120 tuples include bearing mode; Externalized=20,Internalized/transferred/externalized burden transfer is executable
+CQ3,pass,"6/6 families meet comparability rule (>=5 cost types, >=2 stakeholders, upfront+recurring)",Cross-family comparison is executable on shared burden dimensions
+CQ4,pass,12/12 incident tuples include family-linked loss + confidence + provenance,Incident-loss linkage is now represented in artifact form
+CQ5,pass,Family ranking stable in both +/-20% E2/E3 perturbation directions,Sensitivity test is computed from seeded microperformance tuples
+CQ6,pass,VOI ranking computed for 40 family/cost cells,Information-gap prioritization is executable via uncertainty/transfer/incident scoring

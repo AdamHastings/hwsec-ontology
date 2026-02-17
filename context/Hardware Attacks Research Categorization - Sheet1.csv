@@ -1,0 +1,858 @@
+,Summary of each Attack,Threat Model,scope/impact of vulnerability,Original research publication ,Company Notifications,CVE(s),Severity,CWE,Affected Hardware,"Mitigation vector (microcode update, kernel flags, etc)",Mitigation Optionality,Summary of each Defense/Patch,Performance Costs of each patch,Patch Embargo?,Embargo start (date reported),(date fixed),Embargo end (date disclosed),Attack bandwidth 
+Spectre (v1-4) 🟨,"The original speculative execution vulnerabilities consist of Spectre Variants 1, 2, and 4, and Meltdown (Variant 3), all of which exploit performance features in modern 
+CPUs to leak data across security boundaries.
+
+Spectre V1 (Bounds Check Bypass, CVE-2017-5753): Tricks the CPU into speculatively running code past an ""if"" condition (like a boundary check) to leak data. 
+Affects almost all CPUs.",,,https://spectreattack.com/spectre.pdf,"Intel, AMD, Arm, and major OS vendors (Microsoft, Apple, Linux) 
+coordinated disclosure starting January 2018.
+
+AWS: https://aws.amazon.com/security/security-bulletins/AWS-2018-013/ 
+SUSE: https://www.suse.com/support/kb/doc/?id=000019105 
+Intel, AMD, ARM: https://www.bleepingcomputer.com/news/security/intel-amd-arm-warn-of-new-speculative-execution-cpu-bugs/ 
+Intel: https://www.intel.com/content/www/us/en/security-center/advisory/intel-sa-00115.html 
+Lenovo: https://support.lenovo.com/us/en/solutions/ps500151-reading-privileged-memory-with-a-side-channel 
+Dell: modified 12 times so this was original just updated -->  https://www.dell.com/support/kbdoc/en-us/000125160/microprocessor-side-channel-vulnerabilities-meltdown-and-spectre-cve-2017-5715-cve-2017-5753-cve-2017-5754-impact-on-dell-data-security-solutions 
+Google: https://googleprojectzero.blogspot.com/2018/01/reading-privileged-memory-with-side.html 
+
+IBM: https://www.ibm.com/docs/en/i/7.4.0?topic=pdse-mitigating-spectre-meltdown-vulnerabilities-in-new-existing-programs","V1: CVE-2017-5753 
+V2: CVE-2017-5715 
+V4: CVE-2018-3639",,,"3 Most Affected Rationale: Intel, AMD, and ARM are considered the three most significant hardware companies whose CPUs were 
+found to be vulnerable to the early variants of Spectre (V1–V4). These companies dominate the market for processors that rely on 
+speculative execution, the architectural feature that enables the Spectre attacks. 
+
+Intel: https://www.tweaktown.com/news/60411/heres-list-intel-cpus-affected-spectre-meltdown/index.html 
+https://www.intel.com/content/www/us/en/security-center/default.html 
+https://www.intel.com/content/www/us/en/developer/topic-technology/software-security-guidance/processors-affected-consolidated-product-cpu-model.html
+INTEL-SA-00088 and INTEL-SA-00115 are Advisory numbers
+AMD: Go to this website https://www.amd.com/en/search/site-search.html#q=CVE-2017 and search each CVE ID
+ARM: https://developer.arm.com/documentation/110280/latest/ 
+","Summarized Mitigations (3): (source?) --> Included in list below
+-Compiler changes (Retpoline), 
+-OS patches (IBRS, IBPB, RSB filling), 
+-Microcode updates to control speculation.
+
+-For Intel when you search the correct Advisory number in the second link for Intel in cell D2,  
+you can then see CVE recommendations which allows for you to go down a rabbit hole for mitigations 
+-For AMD the mitigations are included in search from 'affected hardware' section in cell D2
+-For ARM the mitigations are listed for these spectre-variants in the link in cell D2
+
+
+Speculative Load Hardening https://llvm.org/docs/SpeculativeLoadHardening.html
+Apple MIE https://security.apple.com/blog/memory-integrity-enforcement/ (claims zero cost!) 
+TDI---is this a Spectre defense? https://ieeexplore.ieee.org/document/9833675
+",,"Mitigation for these flaws requires a mix of Firmware (Microcode) and Software (OS/Compiler) updates:
+
+Meltdown (V3): Fixed by KPTI (Kernel Page Table Isolation), a major OS change that isolates 
+kernel memory from user applications.
+
+Spectre V1: Fixed by Code Hardening (compiler/OS patches) to insert specific instructions like 
+LFENCE to block harmful speculation.
+
+Spectre V2: Fixed by Retpoline (software) and/or IBRS/IBPB (firmware) to safely redirect or flush 
+the branch predictor's history.
+
+Spectre V4: Fixed by enabling SSBD (Speculative Store Bypass Disable) via microcode and OS 
+configuration to prevent speculative reads of old data.","Independent Benchmarking Site: https://www.phoronix.com/review/linux-419-mitigations 
+Tom's Hardware: https://www.tomshardware.com/news/amd-cpus-see-less-than-10-performance-drop-from-revised-spectre-v2-mitigations 
+
+Intel: this shows basic performance --> https://edc.intel.com/content/www/us/en/products/performance/benchmarks/overview/ 
+this shows initial performance costs on a community post, can't open link to intel blog post -->  https://community.spiceworks.com/t/intel-reveals-performance-loss-data-on-meltdown-spectre-patches/628157/1 
+xcdcdc
+AMD: can't find
+ARM: can't find
+
+see here for some benchmarking: https://www.phoronix.com/review/3-years-specmelt
+
+another source: https://www.servethehome.com/intel-offers-enterprise-meltdown-spectre-benchmarks-gift-amd/
+
+see here: https://llvm.org/docs/SpeculativeLoadHardening.html","AMD: https://www.amd.com/en/resources/product-security.html 
+""Disclosure timeliness is determined on an issue-by-issue basis, appropriate to the situation, and with protection of the end-user in mind. In some cases, disclosure may be completed in the common embargo time period of 90 days. In most cases, however, due to eco-system and product complexity, mitigations can take longer to develop, integrate, and provide to end-users. In these cases, a longer embargo period is needed to allow vendors and partners to adequately patch systems.""
+
+Embargo Management: https://apps.dtic.mil/sti/trecms/pdf/AD1172645.pdf ",,,,
+Spectre v1 Bounds Check Bypass,,,,,,,,,,,,,,,,,,
+"NetSpectre (v1) (let's check if this triggered any additional hardware patches, or if this triggered any software patches (e.g. in the browser)","https://arxiv.org/pdf/1807.10535 
+NetSpectre, a an attack based on Spectre variant 1, requiring no attacker-controlled code on the target
+device, thus affecting billions of devices. Similar to a local Spectre
+attack, our remote attack requires the presence of a Spectre gadget in the code of the target. We show that systems containing the
+required Spectre gadgets in an exposed network interface or API
+can be attacked with our generic remote Spectre attack, allowing to
+read arbitrary memory over the network. The attacker only sends
+a series of crafted requests to the victim and measures the response
+time to leak a secret value from the victim’s memory",,,,,,,,,,,,,,,,,
+Spectre v2 Branch Target Injection (BTI) 🟨,"Spectre V2 (Branch Target Injection, CVE-2017-5715): Manipulates the CPU's branch predictor to redirect speculative execution to a malicious code sequence, leaking data across processes or privileges. Affects almost all CPUs.",,,,,,,,,,,,,,,,,
+Spectre v2 variant: Branch Privilege Injection (BPI) 🟨,,,,https://comsec-files.ethz.ch/papers/bprc_sec25.pdf,,,,,,,,,,,,,,
+Spectre v3 Meltdown 🟨,"Meltdown (V3, Rogue Data Cache Load, CVE-2017-5754): Primarily affects Intel CPUs. It allows user code to read privileged kernel memory by exploiting a delay in permission checking during speculative execution.",,,https://meltdownattack.com/meltdown.pdf,"Intel, Arm, IBM, and all major OS vendors (Linux, Windows, Apple) were 
+notified in mid-2017 and coordinated for a public disclosure on January 3, 2018.",CVE-2017-5754 (Rogue Data Cache Load),,,,"OS-level patches known as KPTI (Kernel Page Table Isolation, formerly KAISER), which logically unmap kernel memory from user space during user execution.",,"OS patches that separate the kernel and user memory address spaces (KPTI) so the privileged kernel 
+memory is not mapped in user page tables, which blocks the speculative access attempt.","Significant (5-30% on worst-case scenarios), primarily impacting workloads with frequent system 
+calls and I/O due to the added overhead of frequent TLB flushes and page table switching.",,,,,
+Spectre v4 Spectre SBB 🟨,"Spectre V4 (Speculative Store Bypass, CVE-2018-3639): Allows a memory read to speculatively bypass a pending memory write (store), causing the CPU to read an old, sensitive value. Affects Intel, AMD, and ARM.",,,,,,,,,,,,,,,,,
+"Foreshadow / L1TF✅
+
+CONNECTED","This method impacts select microprocessor products supporting Intel® Software Guard Extensions (Intel® SGX). Further investigation by Intel has identified two related applications of L1TF with the potential to impact additional microprocessors, operating systems, system management mode, and virtualization software. If used for malicious purposes, this class of vulnerability has the potential to improperly infer data values from multiple types of computing devices. ✅","""Attack Model and Objectives"" section on page 3:
+multitenancy in the cloud (find citation)
+user-space privileges. 
+Also consider root-level adversaries 
+
+
+Crucially, in contrast to all previously published SGX side-channel attacks and existing
+Spectre-style speculative execution attacks against
+SGX enclaves, Foreshadow does not require any sidechannel vulnerabilities, code gadgets, or even knowledge of the victim enclave’s code
+
+✅",The vulnerability is a speculative execution attack on Intel processors that may result in the disclosure of sensitive information stored in personal computers and third-party clouds. Malicious applications or guest VMs may infer data in the OS or VM memory ✅,"https://foreshadowattack.eu/foreshadow.pdf
+
+https://foreshadowattack.eu/foreshadow-NG.pdf
+
+
+✅","Intel, Microsoft, Oracle, AWS, Google, and other major cloud/OS vendors were 
+notified and coordinated for a public disclosure on August 14, 2018.
+
+Microsoft: Guidance to mitigate L1TF variant
+https://msrc.microsoft.com/update-guide/en-us/advisory/ADV180018 
+Analysis and mitigation of L1 Terminal Fault (L1TF)
+https://www.microsoft.com/en-us/msrc/blog/2018/08/analysis-and-mitigation-of-l1-terminal-fault-l1tf 
+
+Google: https://cloud.google.com/blog/products/gcp/protecting-against-the-new-l1tf-speculative-vulnerabilities 
+
+AWS: https://aws.amazon.com/security/security-bulletins/AWS-2018-019/ 
+
+Cisco: https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-20180814-cpusidechannel 
+
+✅","All Listed:
+
+CVE-2018-3615 (SGX)
+CVE-2018-3620 (OS/SMM)
+CVE-2018-3646 (VMM/VM)
+
+✅","6.4 Medium: CVE-2018-3615 (SGX) 
+
+5. 6 Medium: CVE-2018-3620 (OS/SMM)
+
+5.6 Medium: CVE-2018-3646 (VMM/VM)
+
+
+✅","CVE-2018-3615 (SGX) --> CWE-203
+
+CVE-2018-3620 (OS/SMM) --> CWE-203
+
+CVE-2018-3646 (VMM/VM) --> N/A
+CVE-2018-3646 (VMM/VM) --> RedHat
+
+✅","Only Intel CPUs affected
+https://www.bleepingcomputer.com/news/security/researchers-disclose-new-foreshadow-l1tf-vulnerabilities-affecting-intel-cpus/#:~:text=aka%20Foreshadow%2DNG-,Only%20Intel%20CPUs%20are%20affected,-According%20to%20the 
+
+
+Intel: https://www.intel.com/content/www/us/en/developer/articles/technical/software-security-guidance/resources/processors-affected-l1tf.html 
+
+
+✅","microcode update
+
+
+✅","Should be done ASAP based on severity and possible impact
+
+✅","Recommended Actions:  
+
+
+✅","Intel Publishes L1TF and Foreshadow Performance Impacts:     https://www.servethehome.com/intel-publishes-l1tf-and-foreshadow-performance-impacts/ 
+
+
+
+Phoronix: https://www.phoronix.com/review/l1tf-foreshadow-xeon/5#google_vignette 
+
+✅","Yes, refer to next 3 columns
+
+
+✅","On Page 2 the ""Disclosure"" section 
+January 3rd, 2018
+✅","Most fixes I found ranged from August 14th-16th 2018, Here is Intel's
+✅","Based on information found in multiple articles in the Foreshadow row, August 14th was the disclosure date (embargo end date)
+
+✅","Foreshadow paper doesn't report bandwidth in traditional KB/s metrics, but rather in terms of success rates per cache line extraction.
+
+
+""Microbenchmark Evaluation"" section of pages 10 and 11
+
+
+✅"
+L1TF Reloaded (Rain),"CVE-2018-3620 (operating systems and SMM)
+CVE-2018-3646 (virtualization environments)",,,https://bughunters.google.com/blog/4684191115575296/project-rain-l1tf,,,,,,,,,,,,,,
+Retbleed✅,"An addition to the family of speculative execution attacks that exploit branch target injection to leak information, which we call Spectre-BTI. Unlike its siblings, who trigger harmful branch target speculation by exploiting indirect jumps or calls, Retbleed exploits return instructions. This means a great deal, since it undermines some of our current Spectre-BTI defenses.
+
+A Spectre-V2 variant that bypasses the Retpoline defense by forcing a return instruction (RET) to be 
+predicted like an indirect branch, allowing an attacker to inject an arbitrary speculative execution 
+target (gadget).  
+
+✅","Run a keyword search for ""threat model"":
+
+
+We consider a realistic threat model where an unprivileged attacker process aims to leak privileged information from the victim kernel
+
+✅","An unprivileged attacker can use these flaws to bypass conventional memory security restrictions to gain read access to privileged memory that would otherwise be inaccessible.
+
+✅","https://comsec.ethz.ch/research/microarch/retbleed/
+
+✅","ETH Zurich researchers coordinated with AMD, Intel, and major 
+operating system/hypervisor vendors for public disclosure in July 2022.
+
+Intel: https://www.intel.com/content/www/us/en/developer/articles/technical/software-security-guidance/advisory-guidance/return-stack-buffer-underflow.html 
+Ubuntu: https://ubuntu.com/security/vulnerabilities/retbleed 
+SUSE: https://support.scc.suse.com/s/kb/Security-vulnerability-RETBLEED-transient-execution-information-leak-side-channel-attack-CVE-2022-29900-CVE-2022-29901?language=en_US 
+AMD: https://www.amd.com/en/resources/product-security/bulletin/amd-sb-1037.html 
+
+
+✅","All Listed:
+
+CVE-2022-29900 (AMD) 
+CVE-2022-29901 (Intel)
+CVE-2022-28693 (Intel)
+
+✅","6.5 Medium: CVE-2022-29900 (AMD) 
+6.5 Medium: CVE-2022-29901 (Intel)
+4.7 Medium: CVE-2022-28693 (Intel)
+
+✅","https://cwe.mitre.org/data/definitions/668.html 
+
+CVE-2022-28693 (Intel) --> CWE-420 (Unprotected Alternate Channel)
+
+✅","Phoronix: Security researchers found that AMD Zen 1/1+/2 and Intel Core 6th through 8th Gen processors. 
+
+
+ETH Zurich: Affected Machines: 
+
+
+✅","Kernel patches to implement modified speculative barriers (IBPB or Jmp2Ret for AMD) 
+that force return instructions to jump to a safe landing pad, preventing the hijacking of the 
+Return Stack Buffer (RSB).
+
+https://access.redhat.com/solutions/retbleed#:~:text=CVE%2D2022%2D23825-,Mitigations,-
+Red%20Hat%20Enterprise 
+
+Page 13: https://comsec.ethz.ch/wp-content/files/retbleed_sec22.pdf 
+
+SUSE: https://support.scc.suse.com/s/kb/Security-vulnerability-RETBLEED-transient-execution-information-leak-side-channel-attack-CVE-2022-29900-CVE-2022-29901?language=en_US 
+ 
+
+
+✅","Based on severity and impact, should be done asap
+
+✅","Software defenses that modify kernel returns to use a safe trampoline (Jmp2Ret) or by applying the 
+IBPB barrier to clear the branch predictor's state on privilege boundary crossings.
+
+Refer to Links in Mititgations Column as well.
+
+
+Includes many patches / mitigations: https://support.scc.suse.com/s/kb/Security-vulnerability-RETBLEED-transient-execution-information-leak-side-channel-attack-CVE-2022-29900-CVE-2022-29901?language=en_US 
+
+✅","High and severe, with Linux testing showing up to 14% overhead on affected AMD CPUs and up 
+to 39% overhead on affected Intel CPUs.
+
+see benchmarking here. https://www.phoronix.com/review/retbleed-benchmark
+Red Hat: https://access.redhat.com/solutions/7011413 
+Intel & AMD & Phantom JMPs: https://comsec.ethz.ch/research/microarch/retbleed/#:~:text=14%25%20and%2039%25-,overhead,-with%20the%20AMD 
+
+
+✅","Page 2 under ""Responsible Disclosure""
+
+***Refer to this link for embargo start and embargo end columns
+
+✅","February 2022 as mentioned in PDF under ""Patch Embargo"" Column
+
+✅","By July 15th 2022, AMD and Intel have announced patches for the bugs, and software vendors have started rolling them out to their users as well.
+
+
+✅","July 12th, 2022 as mentioned in PDF under ""Patch Embargo"" Column
+
+✅","Run a keyword search for ""bandwidth"": 
+
+AMD CPUs range from 14.8 kB/s - 22.5 kB/s
+Intel CPUs range from 3.6 kB/s - 5.9 kB/s
+
+✅"
+"Speculative Return Stack Overflow (SRSO) (""Inception"") 🟨","A Spectre-like vulnerability on AMD CPUs, that poisons the Branch Target Buffer (BTB) 
+and Return Address Predictor (RAP), and then uses an overflow to control the speculative target of a 
+subsequent return instruction (RET).
+
+TODO and Intel as well? ","We consider a typical scenario where an unprivileged attacker
+process aims to leak sensitive information from the kernel.
+We assume the kernel to be free of software vulnerabilities,
+and running on a processor that supports speculative and
+out-of-order execution. Specifically, in this work we target the
+Linux kernel running on x86-64 Intel and AMD processors.
+We also assume the default configuration of all existing miti-
+gations against transient execution attacks. These mitigations
+include retpoline [3, 13], call-depth tracking [56], jmp2ret
+and SuppressBPOnNonBr [6], user pointer sanitization [1],
+KPTI [23], and disabling of unprivileged eBPF [38]. For
+our TTE primitives, we consider CPUs from both Intel and
+AMD, but our end-to-end exploit requires the processor to be
+affected by PHANTOM speculation (AMD Zen 1 (+), Zen 2,
+Zen 3 or Zen 4 [51]). For Zen 4, we additionally consider
+Automatic IBRS, supported in Linux 6.3 and later [40].","-May access privileged memory
+-They can read compromised data, not modify it
+-Occurs within a short window due to nature 
+of speculative execution, and doesn't work on 
+servers only executing trusted code","
+
+https://comsec.ethz.ch/research/microarch/inception/","AMD had an initital disclosure of August 8th, 2023
+
+https://www.amd.com/content/dam/amd/en/documents/epyc-technical-docs/white-papers/amd-epyc-9004-wp-srso.pdf",CVE-2023-20569 (aka INCEPTION),"4.7 Medium:
+CVE-2023-20569  (INCEPTION)",CVE-2023-20569 --> CWE-203,"AMD Zen generations 1-4 --> all families 0x17 and 0x19
+
+Intel? TODO ","Microcode updates and software patches for Safe-RET (forces returns to a controlled location) 
+or use of the IBPB barrier on privilege transitions.","Most of those mitigations are configurable/optional, but microcode is required for the full set of protections to work. Which mitigations are available and which are automatically enabled depends on (a) whether you have the extended IBPB microcode loaded, (b) the CPU’s CPUID bits, and (c) the kernel boot / runtime settings and your threat model.","Branch prediction state flush: flushing the branch predictor state on privilege transitions on certain microarchitectures
+
+
+Safe RET: A hardware/software combination that uses a Safe-RET sequence to force all return speculation to a 
+harmless, controlled location, and optionally employs IBPB to flush the relevant predictors across 
+security boundaries.
+
+IBPB: TODO ","Branch prediction state flush: To fully mitigate, Branch predictor state has to be fully flushed while switching between distrusting contexts.  Zen 1(+) and Zen 2 have an overhead ranging from 93.1%-216.9% depending on specific 
+microarchitecture Zen 3 and Zen 4 no proper hardware support to flush the entire branch predictor state.  AMD have released microcode to enable this feature.
+
+Safe RET: Phoronix: (TODO investigate)
+
+IBPB: Phoronix: (TODO investigate) ","Yes, Page 2 under ""Responsible Disclosure""
+
+","Page 2 under ""Responsible Disclosure""
+February 2023
+",,"Page 2 under ""Responsible Disclosure""
+August 8th 2023","Zen 1(+) and Zen 2:  126 bytes/s, with an accuracy of 89.9%
+
+Zen 3 and Zen 4: 39 bytes/s of kernel memory, with an accuracy of 93.5%"
+MDS - Microarchitectural Data Sampling (combination of four different attacks),"A class of speculative execution attacks that ""samples"" or leaks data from temporary internal CPU buffers 
+(Store, Load Port, and Fill Buffers) that hold ""in-flight"" data before it is written to memory.
+
+Note: MDS refers to ZombieLoad, RIDL, and Fallout collectively ",,,https://www.intel.com/content/www/us/en/developer/articles/technical/software-security-guidance/advisory-guidance/microarchitectural-data-sampling.html,"Intel coordinated with Microsoft, Apple, Google, AWS, Red Hat, and other major 
+OS/Cloud vendors for a public disclosure on May 14, 2019.","CVE-2018-12126 (MSBDS) 
+CVE-2018-12127 (MLPDS) 
+CVE-2018-12130 (MFBDS) 
+CVE-2019-11091 (MDSUM)",,,,"Microcode updates adding the VERW or MD_CLEAR instruction to flush internal CPU buffers, 
+often requiring disabling SMT/Hyper-Threading for full cross-thread protection.",,"A coordinated effort by OS and hypervisor vendors to use new MD_CLEAR CPU instructions 
+(provided via microcode) to erase the contents of the vulnerable microarchitectural buffers on 
+security boundary crossings.","Variable but significant, with some Apple testing showing up to a 40% reduction in performance in 
+multithreaded workloads when SMT/Hyper-Threading is disabled.",,,,,
+Rogue in-flight data load (RIDL),"A specific MDS attack that leaks arbitrary ""in-flight"" data from the Line Fill Buffers and Load Ports 
+by triggering a fault that allows a speculative load to sample the buffer contents.",,,https://mdsattacks.com/files/ridl.pdf,"Disclosed as part of the Microarchitectural Data Sampling (MDS) release 
+coordinated by researchers and Intel on May 14, 2019.","CVE-2018-12127 (MLPDS)
+CVE-2018-12130 (MFBDS)",,,,"Microcode updates (MD_CLEAR/VERW) and kernel patches to flush the buffers on privilege 
+transitions. Disabling SMT/Hyper-Threading is often necessary for full isolation between 
+logical cores.",,"Implementation of the MD_CLEAR instruction via microcode and OS/Hypervisor software to clear 
+the Line Fill Buffers and Load Ports on security boundaries to ensure no stale data remains for sampling.","Included in the general MDS/SMT mitigation costs, which can be significant (up to 40%) 
+in multi-threaded environments, as SMT must be disabled or frequently flushed.",,,,,
+Load Value Injection (LVI) 🟨,"This attack forces a victim to transiently compute on unintended data,
+other than the expected value in trusted memory. Injecting such
+unexpected load values forces a victim to transiently execute
+gadget code immediately following the faulting or assisted load
+instruction with unintended operands (Page 4 Under ""Attack Overview"")","LVI brings a significant change in the threat model, similar to switching from branch history 
+side-channels to Spectre-type attacks. Crucially, LVI has the potential to replace the outcome of any victim load,  including implicit load microops like in the x86 ret instruction, with attacker-controlled data. This is in sharp contrast to Spectre-type attacks, which can only replace the outcomes of branches and store-to-load
+dependencies by poisoning execution metadata accumulated in
+various microarchitectural predictors.
+Page 4 under ""Load Value Injection""","In the context of LVI, an malicious OS can cause arbitrary loads to fault or assist during enclave execution by marking an enclave page as not present, and then resuming the enclave. The next time the enclave code attempts to load from any address within the page marked not present, the memory access will fault, and stale data or a value of 0 may be forwarded to dependent instructions.",https://lviattack.eu/lvi.pdf ,Intel Disclosure,CVE-2020-0551,5.6 Medium,"Not Available, Insufficient Information","Intel Processors with SGX tech and varied microarchitecture
+
+2nd-10th Gen Intel Processors","Microcode necessary but not enough
+
+LFENCE before indirect branches + protected RET
+LFENCE after loads + LFENCE before branches + protected RET
+Intel Mitigations^^^
+","Intel considers LVI particularly severe for SGX and provides a compiler and
+assembler-based full mitigation for enclave programs
+Under ""Responsible Disclosure & Impact"" section on Page 2 
+OSes and VMMs that have already been mitigated against Spectre and L1TF/MDS will significantly reduce the risk of LVI attacks against the OS or VMM.
+","1. Load+Transmit Mitigation blocks leaked values by inserting LFENCE after every load instruction.
+2. Load+Load+Transmit Mitigation prevents attacker-controlled addresses from loading secrets and is automatically covered by mitigating Load+Transmit.
+3. Load+Branch Mitigation stops control flow hijacking by inserting LFENCE after loads feeding branches and replacing RET/indirect jumps with LFENCE-protected sequences.
+4. RET Instruction Protection secures return instructions by replacing RET with POP-LFENCE-JMP (compiler) or SHL-LFENCE-RET (assembler).
+5. Indirect Call/Jump Protection prevents injected values in indirect jumps/calls by loading to a register, inserting LFENCE, then jumping.
+6. REP String Instructions Protection stops secret leakage from data-dependent iterations by unfolding REP CMPS/SCAS into loops with LFENCE after each operation.
+
+
+All Defenses Link","Figure 8 (for OpenSSL on an Intel i7-6700K CPU) on top of page 14
+
+gcc-lfence: 352.51% to 1868.18%
+
+clang-full: 98.94% to 1365.48%
+
+clang-ret: 0.6% to 15.39% (with one outlier at 82.56% for ghash)
+
+own-full: 247.1% to 1642.88%
+
+own-ret: 0.6% to 12.8% (with one outlier at 82.56% for ghash).
+
+Figure 9 (for SPEC2017 on an Intel i9-9900K CPU) on top of page 14
+
+gcc-lfence (non-optimized assembler): This mitigation shows the highest overhead, ranging from 281.6% (602.gcc) to 1081.26% (600.perlbench).
+
+clang-full (optimized clang, full mitigation): This optimized version has a lower but still significant overhead, with a range from 67.09% (623.xalancbmk) to 404.58% (600.perlbench).
+
+clang-ret (optimized clang, ret-only): This partial mitigation generally has the lowest overhead, ranging from 2.52% (657.xz) to 207.55% (602.gcc).
+
+
+
+Phoronix: https://www.phoronix.com/review/lvi-attack-perf/2 ","yes, confirmed in orginal publication
+Page 2 under section: ""Responsible Disclosure & Impact""","April 4th, 2019
+Under same section","Only fix is new hardware
+In ""Conclusion"" section on page 15",March 10 2020,Can't find????
+Zombieload 🟨,"ZombieLoad is a transient-execution attack which observes
+the values of memory loads and stores on the current CPU core.
+ZombieLoad exploits that the fill buffer is used by all logical CPUs
+of a CPU core and that it does not distinguish between processes
+or privileges.
+""Microarchitectural Data Sampling""
+
+^^^Seen On Page 4 under ""Attack Overview""","Attacker: The attacker is assumed to be running unprivileged native code on the target machine.
+
+Hardware: The target is an Intel CPU with Hyperthreading (SMT) enabled. The attack works even on newer processors (like 9th generation) that have hardware mitigations for other vulnerabilities like Meltdown.
+
+Attack Scenarios: The text shows this threat is effective in multiple scenarios:
+
+User-to-User: A malicious application can steal data from another user program (like a web browser).
+
+User-to-Kernel: An unprivileged user can steal data from the operating system kernel.
+
+Outside-to-Enclave: An attacker can steal data from inside a ""secure"" Intel SGX enclave.
+
+VM-to-VM: An attacker in one virtual machine can steal data from another virtual machine.
+
+VM-to-Hypervisor: An attacker in a virtual machine can steal data from the host hypervisor.
+
+Pages 6 & 7 under ""Attack Scenarios & Attacker Model"" sections","The impact of the attack is that it can leak sensitive data (the values of loads and stores) across a variety of security boundaries that are supposed to be isolated
+
+
+^^^^^This was found on Pages 6 & 7 under ""Attack Scenarios & Attacker Model"" sections
+
+The impact of this attack by recovering a full 128-bit
+SGX sealing key, as used by Intel’s trusted provision and quoting enclaves to decrypt the long-term EPID private attestation key
+
+
+^^^^^This was found on Page 10 under the ""SGX Sealing Key Extraction"" section",https://zombieloadattack.com/zombieload.pdf ,"Intel Disclosure
+
+AWS
+
+Google 
+
+Microsoft","Leakage: CVE-2019-11091 (MDSUM)
+Confirmed on original publication on page 2 under ""Responsible Disclosure""
+
+ZLV1: CVE-2018-12103 (MFBDS)
+Confirmed on original publication on page 2 under ""Responsible Disclosure""
+
+ZLV2: CVE-2019-11135 (Transactional Asynchronous Abort aka TAA)
+Confirmed on original publication on page 2 under ""Responsible Disclosure""
+","Leakage: Medium 5.6 
+
+ZLV1: Medium 6.5 
+
+ZLV2: Medium 6.5","Leakage: CWE-226, CWE-203, CWE-385
+
+ZLV1: CWE-863 
+
+ZLV2: Insuficient Info N/A","Red Hat: Affected Products
+
+Intel: Server/Workstation Processors: 
+Broadwell Server E, EP, EP4S, EX
+Skylake Server, Skylake D, Skylake W, Skylake X
+Cascade Lake (including Xeon Scalable processors)
+Intel® Xeon® Scalable processor family
+Intel® Xeon® D processor family
+Intel® Xeon® W processor family
+Intel® Core™ X-series Processors
+
+Desktop/Mobile Processors:
+
+Skylake H, Skylake S (6th Gen Core)
+Kaby Lake (7th Gen Core)
+Coffee Lake (8th/9th Gen Core)
+Comet Lake (10th Gen Core)
+Amber Lake",Bios Microcode Update & Software Updates:  ,Intel advises to do this as soon as possible,"OS and Driver Developers
+What they do: Execute the VERW instruction (a Software Update).
+
+Virtual Machine Monitor (VMM) Developers
+What they do: Execute VERW or L1D_FLUSH (a Software Update) and load the Microcode Update.
+
+Developers of Software in Enclaves (Intel® SGX)
+What they do: Nothing (the fix is automatic).
+
+System Administrators
+What they do: Install all Software Updates and Microcode Updates from vendors.
+
+Hardware Manufacturers (for Future Processors)
+What they do: Create a new Hardware Design.
+
+All Info Link:","MDS Mitigations ranging from 2%-10% overhead
+
+Only Able to find Phoronix","yes, confirmed in publication
+Page 2 under ""Responsible Disclosure"" section","Leakage: March 28th, 2018 & Confirmed Source on May 30th 2018
+Page 2 under ""Responsible Disclosure""
+
+Zombie Load Variant 1 - April 12th 2019
+Page 2 under ""Responsible Disclosure""
+
+Zombie Load Variant 2 - April 24th 2019
+Page 2 under ""Responsible Disclosure""
+
+","Based on Data from original publication and Intel's advisory, the fix dates are as follows
+
+Leakage: May 14th 2019
+
+Zombie Load Variant 1 - May 14th 2019
+
+Zombie Load Variant 2 - November 12th 2019
+
+Intel Advisory  
+
+Orginal Publication 
+
+
+
+","Leakage: May 14th 2019
+Page 2 under ""Responsible Disclosure""
+
+Zombie Load Variant 1 - May 14th 2019
+Page 2 under ""Responsible Disclosure
+
+Zombie Load Variant 2 - November 12th 2019
+Page 2 under ""Responsible Disclosure""","Transmission Rates of state-of-the-art cross-VM
+covert channels ordered by their transmission speed.
+ZombieLoad clocked in at 26.8 kbit/s, considered dangerously fast (without 'VERW' instruction)
+
+Found on Table 4 on Page 12
+
+
+
+Based on publication from CacheOut, with 'VERW' instruction, leakage is only about 0.1 B/s
+^^^Page 2 Under ""Leakage Amount"" section"
+TSX Asynchronous Abort,"An MDS-class vulnerability where an asynchronous abort of an Intel TSX 
+(Transactional Synchronization Extensions) transaction can lead to the speculative execution sampling 
+data from internal CPU buffers.",,,https://www.intel.com/content/www/us/en/developer/articles/technical/software-security-guidance/advisory-guidance/microarchitectural-data-sampling.html,"Disclosed by Intel on November 12, 2019, as an additional MDS-like mechanism 
+that could be used even on systems with initial MDS mitigations.
+
+Linux kernel notice here: https://www.kernel.org/doc/html/latest/admin-guide/hw-vuln/tsx_async_abort.html
+Intel:  https://www.intel.com/content/www/us/en/developer/articles/technical/software-security-guidance/technical-documentation/intel-tsx-asynchronous-abort.html",CVE-2019-11135 (TAA)	,,,,"Microcode updates that either use MD_CLEAR or, as an alternative, advise system 
+administrators to disable Intel TSX entirely on affected processors.",,"The general MDS mitigation of buffer clearing (MD_CLEAR) is the preferred fix; alternatively, the 
+operating system can be configured to completely disable the Transactional Synchronization Extensions 
+(TSX) feature.","Minimal if MD_CLEAR is effective, but if TSX is disabled, the performance gain of software 
+relying on Transactional Memory is completely lost.",,,,,
+CacheOut 🟨,"In this section we present CacheOut, a transient-execution
+attack that allows an attacker to read the victim’s data from
+the L1-D cache through cache evictions. We describe two
+variants: the first targets data modified by the victim’s write
+operations, while the second aims at data that the victim reads
+but does not modify
+
+
+^^^^^Found on Page 4 under ""The CacheOut Attack"" section","This model posits an unprivileged attacker, like an app or VM, targeting a fully patched Intel system. The attack requires Intel's TSX feature to be enabled and the attacker to be running on the same physical CPU core as the victim. For attacks against SGX enclaves, the attacker is assumed to be a malicious OS with control over the CPU.
+
+
+^^^^^Found on Page 4 under ""Threat Model and Hardware Setups"" section",Information Disclosure (unauthorized reads),https://cacheoutattack.com/files/CacheOut.pdf ,"Intel Disclosure:
+
+
+","CVE-2020-0549
+
+This was found on publication Page 3 under ""Current Status and Disclosure""","NIST: Medium 5.5
+
+Intel: Medium 6.5",CWE-404: Improper Resource Shutdown or Release,"Intel® Core™ 6th Generation (Codename: Skylake)
+
+Intel® Core™ 7th Generation (Codename: Kaby Lake)
+
+Intel® Core™ 8th Generation (Codename: Kaby Lake R / Coffee Lake)
+
+Intel® Core™ 9th Generation (Codename: Coffee Lake R)
+
+Intel® Core™ 10th Generation (Codename: Amber Lake / Comet Lake / Cascade Lake-X)
+
+Intel® Xeon® Scalable Processors (Codename: Skylake-SP)
+
+Intel® Xeon® Scalable Processors 2nd Generation (Codename: Cascade Lake-SP)
+
+Intel® Xeon® W Processors (Codename: Skylake-W / Cascade Lake-W)
+
+Intel® Xeon® D Processors (Codename: Skylake-D / Cascade Lake-D)
+
+Intel® Xeon® E Processors (Codename: Kaby Lake / Coffee Lake / Cascade Lake)
+
+
+All Info Link",Microcode Updates,"According to long list of affected hardware, and severity risk, updating the microcode can be seen as important to do as soon as possible",Push microcode update corresponding to affected hardware type,"It seems that the same mitigation used for ZLV2 is used for CacheOut (TSX Async Abort), aka TAA, I could only find Phoronix post about ZLV2 but performances should be the same: 
+
+So when TSX is disabled completely which is what the attack needs, sometimes it is faster and sometimes it is slower than vulnerable state, same goes for TSX enabled with default mitigation. It depends on the Benchmark type","yes, confirmed on publication Page 3 under ""Current Status and Disclosure","Intel informed on October 2019
+
+This found on Page 3 ""Current Status and Disclosure""","Microcode updates mitigating root cause behind CacheOut published June 9th, 2020","Disclosed January 27th, 2020","On Page 2 under ""Leakage Amount"" section
+
+2.85 KiB/s with 'VERW' instruction"
+SRBDS (CrossTalk) ✅,"CROSSTALK is a two-stage profiling framework designed to discover cross-core information leakage that occurs via Intel's shared staging buffer. The first stage, Instruction Profiling, utilizes performance counters to identify which x86 instructions make offcore memory requests. This process expands on prior work by testing instructions with diverse operands and in various contexts, such as different privilege levels, VM environments, and SGX enclaves, to comprehensively map microcode behavior. This revealed that context-dependent instructions, like CPUID and RDMSR, exhibit varying offcore request patterns depending on their inputs. The second stage, Staging Buffer Analysis, combines these results with MDS attacks to demonstrate that offcore requests flow through a globally-shared staging buffer. This stage uses ""masking primitives""—instructions writing known values—to map which instructions leak data at specific buffer offsets. The output is a catalog of ""leak primitives,"" or instructions that leak cross-core data, which notably includes RDRAND and RDSEED. The key innovation of this framework is its context-aware profiling, which reveals that instruction behavior depends heavily on operands, thereby uncovering cross-core leakage paths missed by previous static analysis.
+
+
+
+Page 4 & 5 ""Crosstalk"" section","Attacker and victim co-located on same physical system but isolated on separate CPU cores with all standard transient execution mitigations enabled. Despite conservative OS scheduling that separates security domains across cores, attacker can exploit cross-core staging buffer to leak sensitive data (e.g., RDRAND output) via transient execution.","Information Disclosure (unauthorized reads)
+
+Can read ",https://download.vusec.net/papers/crosstalk_sp21.pdf ,"Intel Disclosure
+
+Ubuntu
+
+Red Hat
+
+","CVE-2020-0543
+
+Found on Intel Advisory Board","NIST: Medium 5.5
+
+Intel: Medium 6.5",CWE-459: Incomplete Cleanup,"Consumer Desktop/Laptop (Intel Core):
+
+Ivy Bridge (3rd Gen Core, 2012-2013)
+Haswell (4th Gen Core, 2013-2014)
+Broadwell (5th Gen Core, 2014-2015)
+Skylake (6th Gen Core, 2015-2016)
+Kaby Lake (7th Gen Core, 2016-2017)
+Coffee Lake (8th Gen Core, 2017-2018)
+Whiskey Lake (8th Gen refresh, 2018)
+Amber Lake (low-power mobile, 2018)
+Comet Lake (10th Gen, 2019-2020) - Some models
+
+Workstation/Small Business:
+
+Intel Xeon E3 (v1 through v6)
+Intel Xeon E (E-2100, E-2200 series)
+
+Specific CPUs tested in the paper:
+
+Intel Core i7-7700K (Kaby Lake)
+Intel Core i7-6700K (Skylake)
+Intel Core i7-5775C (Broadwell)
+Intel Xeon E3-1220V6 (Kaby Lake)
+Intel Xeon E3-1240V5 (Skylake)
+Intel Core i9-9900K (Coffee Lake R)
+Intel Core i7-8665U (Whiskey Lake)
+Intel Core i7-8850H (Coffee Lake)
+Intel Xeon E-2288G (Coffee Lake)
+
+All Info Link",Microcode Updates,"According to long list of affected hardware, and severity risk, updating the microcode can be seen as important to do as soon as possible",Microcode updates on Github Repository,"Phoronix shows the actual mitigation against RDRAND and it slaughtered the performance down to around 3% of the original performance, which is exactly what they wanted. It also shows it against other servers and workloads and the % was within 10% of orginal performance, usually 5% or lower. Since RDRAND isn't used that often as a x86 instruction, Intel was able to get away with it","yes, confirmed on publication paper, Page 14 under ""Disclosure"" section","Initial PoC of staging buffer leaks disclosed to Intel in September 18th, and cross-core RDRAND/RDSEED
+leakage disclosed to Intel in July 2019
+The embargo starting on September 18th or July 2019 isn't explicitely mentioned but since the authors didn't release anything after the first date, the embargo must have started then",Mcrocode updates were release with initial disclosure on June 9th 2020,"Intel requested embargo until May 2020, but later extended to June 9th 2020 due to the difficulty of implementing a fix for the vulnerabilities
+
+","2 bytes/round (Skylake); 3 KB/s cross-core covert channel with <5% error
+
+Comments:
+
+A ""round"" refers to one complete cycle of the FLUSH+RELOAD technique used to extract data from the staging buffer
+
+This is the sustained throughput - how fast an attacker can reliably transmit/leak information between two processes running on different physical CPU cores
+
+Less than 5% of the leaked bytes are incorrect"
+PACMAN 🟨,"The PACMAN attack combines memory corruption attacks and speculative execution attacks. An attacker can use the PACMAN attack to construct a PAC oracle to distinguish between a correct PAC and an incorrect PAC for an arbitrary pointer. The key insight of the PACMAN attack is to use speculative execution attacks to leak PAC verification results stealthily via micro-architectural side channels without causing crashes. We find several code patterns to be effectively used for this purpose, and we call these code patterns PACMAN gadgets
+
+Page 4 under ""The Pacman Attack"" section ","The attacker first uses the PAC oracle to brute-force all possible PACs and find the matching PAC for the chosen address.
+The attacker then bypasses the protection of Pointer Authentication by modifying the protected pointer using the matching PAC and
+hijack the control flow of the victim
+
+Page 4 under ""Threat Model"" section","The kernel is the most privileged part of your computer’s operating system. Compromising the kernel means that an attacker can do anything you can do (eg. read any file, see browser data, etc.). PACMAN works across privilege levels, so it works on the kernel from user mode. It is also important to recognize the fact that this attack can be remotely executed.","https://pacmanattack.com
+
+
+Original Publication",ARM Disclosure,No CVE https://nvd.nist.gov/vuln/detail/CVE-2025-3165 ,"Due to this attacks ability to compromise the kernel, I would say it is a high risk",No CWE,"Apple M1 CPU
+
+ARM
+Arm Cortex-A series processors (with PAuth but not FPACC_SPEC)
+Arm Cortex-X series processors (with PAuth but not FPACC_SPEC)
+Arm Neoverse series processors (with PAuth but not FPACC_SPEC)
+Armv8.3-A and later introduced FEAT_PAuth (the vulnerable feature)
+Later ARM architecture versions introduced FEAT_FPACC_SPEC (the hardware mitigation)","Best: Use FEAT_FPACC_SPEC - Hardware feature (in newer ARM cores) that prevents the speculative execution side-channel PACMAN exploits
+
+For CPUs with FEAT_FPAC (faulting PAC): Insert XPAC instructions after authentication to clear PAC fields and prevent the ""oracle"" attack, though this has performance costs
+
+For older CPUs without FPAC: Use speculation barriers after AUT instructions, but this has severe performance impact
+
+Always: Continue using standard protections including PAC (since it still protects against ROP/JOP attacks), and patch memory corruption bugs in software
+
+Key point: ARM still strongly recommends using Pointer Authentication despite PACMAN, because without it, attackers could easily create ROP/JOP gadgets. The mitigation is layered - fix software bugs AND use hardware defenses where available.","Due to this attack's ability to compromise the kernel, mitigation should be a priority",Refer to mitigation vector column,"Using fence/isb instructions after pointer authentication instructions to pause speculative execution could incur significant performance penalty, as these instructions are very common in programs protected using Pointer Authentication
+
+Page 12 under ""Countermeasures"" section
+
+
+You can also refer to the section ""Brute-Force Attack"" on Page 11
+^^^This shows more info which I describe in the attack bandwidth column",N/A,Unknown,Disclosure Date,June 10th 2022,"It took 2.69 milliseconds on average to test one PAC value, meaning it would take around 2.94 minutes on average to try all possible 16-bit PAC values on the M1. In 50 brute-force experiments under noisy conditions, they found the correct PAC in 90% of trials with no false positives; the remaining 10% produced no result but could simply be repeated
+
+Page 11 under ""Brute-Force Attack"" section"
+"Branch Predictor Race Condition 
+(Branch Privilege Injection mitigation bypass) 🟨
+
+CONNECTED","Branch Predictor Race Condition allows attacker to bypass Spectre v2 mitigations 
+
+Which mitigations?
+
+The BPRC vulnerability bypasses hardware-enforced mitigations:
+
+eIBRS/AutoIBRS (Intel's hardware mitigation)
+IBPB (hardware prediction barrier)
+
+*mentioned in paper, section 5.2 and 5.3
+
+
+
+
+
+Branch Privilege Injection (BPI) is a new Spectre v2 primitive that injects arbitrary branch predictions tagged with kernel privilege from user mode, exploiting Branch Predictor Race Conditions (BPRC) - a class of vulnerabilities where asynchronous branch predictor operations violate hardware-enforced privilege and context separation mechanisms in Intel CPUs
+
+
+This is found on Page 1 under ""Abstract"" section and on Page 4 under ""Overview"" section","The threat model assumes a local attacker with unprivileged code execution capabilities on a machine running an up-to-date Linux kernel on top of Ubuntu 24.04 with all the latest security updates and mitigations against CPU vulnerabilities (version 6.8.0-47-generic at the time of writing). The aim of the attacker is to leak arbitrary privileged memory by hijacking the speculative control flow despite deployed hardware mitigations such as eIBRS, AutoIBRS and CSV2 on Intel, AMD and ARM CPUs 
+
+
+Found on Page 4 under ""Threat Model"" section","Information Disclosure: Arbitrary Privileged Memory Disclosure, including Kernel Memory Leakage, and Cross-Privilege Boundary Information Leakage
+
+
+Specific Type found on Page 1 under ""Abstract"" section ","Branch Privilege Injection: Exploiting Branch Predictor Race Conditions – Computer Security Group
+
+
+Original Publication:",Intel,"CVE-2024-45332
+CVE-2025-20623
+CVE-2024-43420",Medium 5.7 (CVSS 4.0),CWE-1423: Exposure of Sensitive Information caused by Shared Microarchitectural Predictor State that Influences Transient Execution,"All intel processors since the 9th generation (Coffee Lake Refresh), possibly as far back as 7th generation (Kaby Lake). Only Intel Processors are affected, analysis did not find any issues on the evaluated AMD and ARM systems.
+
+See full Intel table here",Intel microcode updates ,"Intel recommends to update to the latest version of firmware and based on severity of the threat, this can be seen as a priority","IPRED_DIS_S Mitigation:
+(Disables indirect branch prediction in supervisor mode)
+Found on Page 14 under ""IPRED_DIS_S"" section 
+
+
+Retpoline Mitigation:
+(Replaces indirect branches with return-based constructs)
+Found on Page 13 under ""Retpoline"" section","IPRED_DIS_S Mitigation:
+(Disables indirect branch prediction in supervisor mode)
+
+Sapphire Rapids: 1.7% / 6.4% (UnixBench / lmbench)
+Raptor Lake: 1.1% / 6.3%
+Alder Lake: 1.5% / 4.7%
+Not available for older CPUs (Rocket Lake, Comet Lake, Coffee Lake Refresh)
+
+Retpoline Mitigation:
+(Replaces indirect branches with return-based constructs)
+
+Sapphire Rapids: 2.4% / 8.0%
+Raptor Lake: 2.2% / 6.6%
+Alder Lake: 2.4% / 8.2%
+Rocket Lake: 3.1% / 8.3%
+Comet Lake: 0.5% / 2.4%
+Coffee Lake Refresh: 0.5% / 1.6%
+
+
+All Info found on Page 13 on Table #5","yes
+
+Found on Page 2 under ""Responsible Disclosure"" section","September 2024  
+Found on Page 2 under ""Responsible Disclosure"" section","Fix was on disclosure date May 13th 2025, and updates were made May 27th 2025","May 13 2025
+
+Found on Page 2 under ""Responsible Disclosure"" section"," 5.6 KiB/s on Intel Raptor Cove (Intel CPU 13th & 14th Gen)
+
+Found on Page 2 under ""Branch Privilege Injection"" section 
+
+Over 1000 executions, end-to-end exploit completed with a median 21 s, leaking the full root hash 90.7% of the time. 97.9% of the time, there were at most 6 errors in the leaked hash.
+
+Found on Page 13 under ""End-to-end exploit"" section"
+EntrySign 🟨,"https://github.com/google/security-research/security/advisories/GHSA-4xq7-4mgh-gp6w
+
+https://bughunters.google.com/blog/5424842357473280/zen-and-the-art-of-microcode-hacking
+
+""Improper signature verification in AMD's microcode patch loader, allowing third parties to execute arbitrary microcode on your processor""","""Adversary with local administrator privileges (ring 0 from outside a VM)""","AMD-SB-7033: Potential Impact: Loss of integrity of x86 instruction execution, loss of confidentiality and integrity of data in x86 CPU privileged context and compromise of SMM execution environment
+
+",Zen and the Art of Microcode Hacking,AMD-SB-7033,AMD-SB-7033  / CVE-2024-36347 ,6.4 (CVSS v3),CWE-347: Improper Verification of Cryptographic Signature,Zen 1 – Zen 5,"microcode update
+source?",,"""microcode validation routine to use a custom secure hash function""","Cost of microcode/BIOS update
+Negligible cost during each subsequent microcode update (presumably)",yes,"September 25, 2024","December 17, 2024","February 3, 2025",n/a
+,,,AMD-SB-3019: Loss of the SEV-based protection of a confidential guest.,,AMD-SB-3019 ,AMD-SB-3019 / CVE-2024-56161        ,7.2 (CVSS v3),CWE-347: Improper Verification of Cryptographic Signature,Zen 1 – Zen 5,"microcode update
+source?",,,"Cost of microcode/BIOS update
+Negligible cost during each subsequent microcode update (presumably)",,,,,
+Batterygate (not a security patch!) 🛑,"An OS (?) update throttled the performance of older iPhones. Apple claimed that this was to protect battery life. Critics said that this was an attempt to induce customers into buying new iPhones. Went to trial in a class action lawsuit and resulted in a multi-million dollar payout by Apple. 
+
+Not a security issue but closely related to the idea of devices losing performance due to patching ",,,,,,,,,,,,,,,,,
+"Training Solo / Indirect Target Selection 🛑
+
+CONNECTED","Breaking Spectre v2 defenses (BPB, eIBRS, and BHI_NO) ",,,https://www.vusec.net/projects/training-solo/,,History-based attacks (no CVE?),,,"Affected: All Intel CPUs with eIBRS, including Intel’s latest generation Lion Cove which features the BHI_NO feature. Selected ARM CPUs, see vendor website. (source)","New x86 instruction: Intel created a new instruction IBHF (Indirect Branch History Fence) which can be placed after history-crafting gadgets, shipped via a micro-code update for certain CPUs. For older CPUs, Intel recommends using a software BHB-clearance sequence.",,,Not mentioned in paper,yes? (implied),March 2024,,,17 KB/sec
+,,,Information Disclosure (unauthorized reads),,INTEL-SA-01153 / CVE-2024-28956,Indirect Target Selection (ITS) (CVE-2024-28956),5.7,(Awaiting Analysis),"Affected: Multiple Intel CPU generations (i.e., Intel Core 9th-11th, Intel Xeon 2nd-3rd). Please refer to Intel’s advisory for a complete list. (source)","New indirect branch thunks: New indirect branch thunks have been developed by Intel and Linux kernel engineers which places all indirect branches on the upper half of the cache line. As only indirect branches present on the lower half of a cache line are vulnerable, this effectively mitigates self-training ITS and guest-hypervisor attacks. ",,,Not mentioned in paper,yes? (implied),March 2024,,2025-05-12,
+,,,Information Disclosure (unauthorized reads),,INTEL-SA-01322,Lion Cove BPU issue (CVE-2025-24495),6.8,(Awaiting Analysis),Affected: Intel CPUs with Lion Cove core (Lunar Lake / Arrow Lake) (source),"microcode update
+IBPB micro-code update: Intel published a micro-code update to fix the IBPB bypass.",,,Not mentioned in paper,yes? (implied),March 2024,,2025-05-12,
+Intel FDIV 🛑,"Famous for being the first one of these types of attacks! From 1994. Not a security bug but important to reference for historical reasons 
+
+Missing entries in FDIV lookup table caused incorrect division outputs 
+
+TODO: follow sources here: https://en.wikipedia.org/wiki/Pentium_FDIV_bug",n/a,Some floating point divisions returned incorrect results,https://people.cs.vt.edu/~naren/Courses/CS3414/assignments/pentium.pdf,https://web.archive.org/web/20090511094631/http://www.intel.com/support/processors/pentium/sb/CS-012748.htm,None (n/a),None (n/a),None (n/a),"Intel Pentium chips: 60, 66, 75, 90 or 100MHz Pentium® processor",software patches OR total chip replacement ,,TODO ,"software patches: Affected divisions had a 2x overhead Random divisions had an amortized average 25% overhead. Average programs (which only rarely used FDIV) had an average 1% overhead 
+
+hardware patch: cost to replace part; cost of downtime 
+
+Need to see if the above is cited in this article (which has additional discussion)",No,"reported October 19, 1994
+Intel had been aware since June 1994","Agreed to fix by December 
+
+Carlton, Jim; Yoder, Stephen K. (December 21, 1994). ""Computers: Humble Pie: Intel to Replace its Pentium Chips"". The Wall Street Journal (Eastern ed.). p. B1.","Published November 7, 1994 
+Not a true embargo ",n/a
+"Downfall 🛑
+Gather Data Sampling","""exploit[s] the gather instruction on high-performance x86 CPUs to leak data across boundaries of user-kernel, processes, virtual machines, and trusted execution environments ... to steal cryptographic keys, program’s runtime data, and even data at rest (arbitrary data)""","Two models considered: 
+(1) Concurrently running on sibling threads of the same core (Sections 4 to 7)
+(2) Context switching on the same CPU thread (Sections 4 and 8)",Loss of confidentiality ,https://downfall.page/,"Many company advisories on https://downfall.page/ (see ""Advisories"" section)
+",CVE-2022-40982,6.5 (CVSS v3.1),CWE-1342: Information Exposure through Microarchitectural State after Transient Execution,"""6th Skylake to (including) the 11th Tiger Lake generation are affected"" ","microcode update 
+(Intel Platform Update (IPU) 23.3 microcode update (1, 2))",,"Paper suggestions: 
+ - disable SMT (30% performance loss) [see citation 7]","Initial Benchmarks Of The Intel Downfall Mitigation Performance Impact - Phoronix
+
+Paper also has some discussion (see Section 9)
+
+More discussion here: https://www.tomshardware.com/news/intel-downfall-mitigation-performance-drop-linux","yes (""responsible disclosure"")","Reported August 24, 2022 ",,"Intell asked for embargo until August 2023
+
+CVE published 2023-08-11","Covert channel rates in Table 4: Covert channel data rates (0–5000 Bytes/Second).  
+6.3 Reading Kernel Memory from User-space:  
+ - Gadget 1: leaks 128 OOB data exploiting Gadget 1 in 1.04 seconds after 10 tries 
+ - Gadget 2: leaked 238 bytes of the Linux banner string, linux_banner, in 1.37 seconds
+ - Gadget 3: leaked 238 bytes of the Linux banner string, linux_banner, in1.58 seconds.
+
+
+7.2 Exploiting Gather Value Injection:
+ - 8734.3 bytes per second of OOB (Tiger Lake)"
+Reptar, - , - ,,,,,,,,,, - ,"""No performance impact has been observed nor is expected from this updated microcode""",,,,,
+FPGA bitstream patching 🛑,,,,,,,,,,,,,,,,,,
+CVE-2024-5660,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,
+"EntrySign is farthest down I've worked on as of 10/24/25
+I need to go back to beginning and reorganize all of the others ones
+🟨 = been worked on but needs a fair amount of work
+🟨✅ = really close to being done
+✅ = done
+highlighted yellow means it is about to be worked on
+🛑 = hasn't been touched yet",papers to cite:,,Notes,,,,,,,,,,,,,,,
+,The Performance Cost of Software-based Security Mitigations,,,,,,,,,,,,,,,,,
+,Affected Processors: Guidance for Security Issues on Intel® Processors,,should we include all of these? ,,,,,,,,,,,,,,,
+,A Large-Scale Empirical Study of Security Patches,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,
+Corresponding Links to new corrected scope for Intel:,,,,,,,,,,,,,,,,,,
+"
+Foreshadow L1TF Microcode Update, We have in sheet already & done",Security Bulletins,"Corrected Scope Links:
+https://www.intel.com/content/www/us/en/developer/topic-technology/software-security-guidance/advisory-guidance.html ",,,,,,,,,,,,,,,,
+"Branch Predictor Race Condition
+Has NO microcode update currently, We have in sheet already and mostly done",https://www.amd.com/en/resources/product-security.html,,,,,,,,,,,,,,,,,
+"Indirect Target Selection Microcode Update, We have in sheet already but have NOT researched yet",https://www.intel.com/content/www/us/en/security-center/default.html,,,,,,,,,,,,,,,,,
+"Subpage Permission
+DON'T have & NO update",https://developer.arm.com/Arm%20Security%20Center/#,,,,,,,,,,,,,,,,,
+"INTEL-SA-01084 = don't have, & no update",https://www.nvidia.com/en-us/product-security/,,,,,,,,,,,,,,,,,
+"Register File Data Sampling
+Microcode Update, NOT on sheet yet",,,,,,,,,,,,,,,,,,
+"Trusted Execution Configuration Register Access
+Microcode Update & NOT on sheet",,,,,,,,,,,,,,,,,,
+"Redundant Prefix Issue
+Microcode Update & NOT on sheet",,,,,,,,,,,,,,,,,,
+"Downfall (Gather Data Sampling)
+Microcode Update & on sheet but no research yet",,,,,,,,,,,,,,,,,,
+"Stale Data Read from Legacy xAPIC
+Software Development Kit & NOT on sheet",,,,,,,,,,,,,,,,,,
+"Post-barrier Return Stack Buffer Predictions
+Software Guidance & NOT on sheet",,,,,,,,,,,,,,,,,,
+"Retbleed (Return Stack Buffer Underflow)
+Microcode Update & Software Guidance & on sheet and researched, might need to do more for CVE-2022-28693 specifically",,,,,,,,,,,,,,,,,,
+"Processor MMIO Stale Data Vulnerabilities
+Microcode Updates & Software Changes, NOT on sheet",,,,,,,,,,,,,,,,,,
+"Undefined MMIO Hang (UMH)
+Mitigation = Limited MMIO access, NOT on sheet",,,,,,,,,,,,,,,,,,
+"Speculative Load Disordering
+Mitigation NOT NEEDED, NOT on sheet",,,,,,,,,,,,,,,,,,
+"Branch History Injection
+Mitigation includes software changes that relies on what should be already updated microcode, NOT on sheet",,,,,,,,,,,,,,,,,,
+"Floating Point Value Injection
+Past Microcode Amongst Software settings and changes, NOT on sheet",,,,,,,,,,,,,,,,,,

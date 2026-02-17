@@ -1,0 +1,31 @@
+Generated: 2026-02-17T15:03:56Z
+Tuples: 120
+Incident tuples: 12
+Families: 6
+CQ rows: 6
+Missing key fields: 0
+Missing incident fields: 0
+
+[Evidence grades]
+E1,59
+E2,39
+E3,22
+
+[Data origins]
+Inferred,39
+Measured,59
+Synthetic,22
+
+[Time horizons]
+Contingent,4
+Deferred,2
+Recurring,60
+Upfront,54
+
+[Bearing modes]
+Externalized,20
+Internalized,66
+Transferred,34
+
+[CQ status]
+pass,6

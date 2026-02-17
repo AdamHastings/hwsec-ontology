@@ -1,0 +1,65 @@
+# CQ1 (Cost visibility):
+# For a mechanism family/context, what costs exist by stakeholder and lifecycle phase,
+# including magnitude, unit, evidence annotation, and source provenance?
+SELECT ?family ?stakeholder ?time ?costType ?value ?unit ?evidence ?dataOrigin ?sourceKey ?sourceLocator WHERE {
+  ?m ex:belongsToFamily ?family ; ex:incursCost ?c .
+  ?c ex:borneBy ?stakeholder ;
+     ex:realizedAt ?time ;
+     ex:hasCostType ?costType ;
+     ex:costValue ?value ;
+     ex:costUnit ?unit ;
+     ex:hasEvidenceType ?evidence ;
+     ex:hasDataOrigin ?dataOrigin ;
+     ex:sourceKey ?sourceKey ;
+     ex:sourceLocator ?sourceLocator .
+}
+
+# CQ2 (Burden transfer):
+# Which costs are internalized, transferred, or externalized, and to whom?
+SELECT ?bearingMode ?stakeholder (COUNT(?c) AS ?n) WHERE {
+  ?c ex:hasBearingMode ?bearingMode ; ex:borneBy ?stakeholder .
+}
+GROUP BY ?bearingMode ?stakeholder
+
+# CQ3 (Comparative choice):
+# For a fixed threat/security objective, how do mechanisms differ in burden profile?
+SELECT ?threat ?family ?stakeholder ?time ?costType WHERE {
+  ?m ex:mitigatesThreat ?threat ; ex:belongsToFamily ?family ; ex:incursCost ?c .
+  ?c ex:borneBy ?stakeholder ; ex:realizedAt ?time ; ex:hasCostType ?costType .
+}
+ORDER BY ?threat ?family ?stakeholder ?time
+
+# CQ4 (Loss attribution):
+# Which observed losses are plausibly linked to missing/weak controls?
+SELECT ?incident ?family ?stakeholder ?loss ?unit ?confidence WHERE {
+  ?incident a ex:IncidentEvent ;
+            ex:linkedToMissingFamily ?family ;
+            ex:impactsStakeholder ?stakeholder ;
+            ex:incidentLossValue ?loss ;
+            ex:incidentLossUnit ?unit ;
+            ex:attributionConfidence ?confidence .
+}
+ORDER BY DESC(?confidence)
+
+# CQ5 (Sensitivity):
+# Which uncertain (E2/E3) values drive ranking sensitivity?
+SELECT ?family ?costType ?value ?evidence WHERE {
+  ?m ex:belongsToFamily ?family ; ex:incursCost ?c .
+  ?c ex:hasCostType ?costType ; ex:costValue ?value ; ex:hasEvidenceType ?evidence .
+  FILTER(?evidence IN (ex:EstimatedEvidence, ex:ExpertElicitedEvidence))
+}
+
+# CQ6 (Information gap):
+# Which missing measurements would most reduce uncertainty?
+SELECT ?family ?costType (SUM(?score) AS ?voiScore) WHERE {
+  ?m ex:belongsToFamily ?family ; ex:incursCost ?c .
+  ?c ex:hasCostType ?costType ;
+     ex:hasEvidenceType ?evidence ;
+     ex:hasBearingMode ?bearingMode .
+  BIND(IF(?evidence = ex:ExpertElicitedEvidence, 2,
+       IF(?evidence = ex:EstimatedEvidence, 1, 0)) AS ?uncertaintyWeight)
+  BIND(IF(?bearingMode = ex:Transferred || ?bearingMode = ex:Externalized, 1, 0) AS ?transferWeight)
+  BIND(?uncertaintyWeight + ?transferWeight AS ?score)
+}
+GROUP BY ?family ?costType
+ORDER BY DESC(?voiScore)

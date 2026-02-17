@@ -1,46 +1,114 @@
-\section{Evidence-Grounded Mechanism Cases}
-\subsection{Speculation Controls, TEEs, and Crypto Accelerators}
-This section instantiates the ontology with three mechanism families requested
-by our scope: speculation controls, trusted execution environments (TEEs), and
-cryptographic acceleration. Rather than hypothetical values, Table
-\ref{tab:worked-case} reports published measurements and maps each mechanism to
-posture, manifestation mode, and cost bearer.
+\section{Evidence-Grounded Case Studies}
+\subsection{Why Deep Case Mapping Matters}
+Case studies are the bridge between ontology semantics and hardware-security
+practice. They test whether classes and relations are expressive enough for
+real mechanisms, and they expose burden pathways that mechanism-local reporting
+usually hides (transfer, externality, and delayed loss effects)
+\cite{anderson2001economics,anderson2006economics}.
+
+\subsection{Case Design and Corpus}
+The seed corpus now covers six families (20 tuples each): speculation controls,
+TEEs, cryptographic accelerators, rowhammer mitigations, memory-safety
+mitigations, and reactive runtime detection/response controls. We additionally
+encode 12 incident-linkage tuples to connect weak/missing control families to
+loss observations with confidence annotations.
+
+\subsection{Cross-Family Snapshot}
+Table~\ref{tab:worked-case} summarizes representative anchors and ontology
+dimensions across families.
 
 \begin{table*}[t]
-  \caption{Compact comparison of manifestation and burden using published measurements.}
+  \caption{Cross-family measurements mapped to ontology dimensions.}
   \label{tab:worked-case}
   \centering
-  \small
-  \begin{tabular}{p{0.16\textwidth}p{0.08\textwidth}p{0.10\textwidth}p{0.10\textwidth}p{0.20\textwidth}p{0.16\textwidth}p{0.10\textwidth}p{0.08\textwidth}}
+  \scriptsize
+  \setlength{\tabcolsep}{3pt}
+  \begin{tabular}{p{0.14\textwidth}p{0.07\textwidth}p{0.10\textwidth}p{0.13\textwidth}p{0.21\textwidth}p{0.17\textwidth}p{0.10\textwidth}}
     \toprule
-    Mechanism family & Posture & Activation & Scope & Representative measured effect & System opportunity cost & Primary bearer & Dominant timing \\
+    Family & Posture & Activation & Scope & Representative anchors & Primary bearer(s) & Timing \\
     \midrule
-    Speculation controls (Retbleed mitigations) & Proactive & Always-on or mode-dependent & System-wide & Reported UnixBench slowdown from 5.78\% to 27.90\% across tested CPU/mitigation configs \cite{retbleed2022} & Reduced speculative behavior can permanently trade peak throughput for attack-surface reduction & Operator + platform vendor & Recurring \\
-    TEE (Sanctum-style hardware isolation) & Proactive & Conditional (enclave entry/exit) with always-present hardware cost & Module/workload-specific & Per-core hardware overhead of +0.78\% gates and +1.9\% flip-flops; less than 3\% runtime overhead for most benchmarks with quarter LLC partition, but up to 23\% on memory-intensive workloads \cite{sanctum2016} & Capacity and cache partitioning can reduce non-enclave performance under contention & Chip vendor + integrator + operator & Upfront + recurring \\
-    Crypto accelerator (OpenTitan secure element) & Proactive & Conditional (crypto workload triggered) & Module/workload-specific & AES engine reports up to 44x speedup over software at 4KB payload; secure element occupies 1.7\,mm$^2$ within a 7.28\,mm$^2$ subsystem \cite{opentitan2024} & Area/power budget allocated to crypto and secure processing is unavailable for general-purpose cores or cache & Chip vendor + integrator & Upfront + recurring \\
+    Speculation controls & Proactive & Often always-on & System-wide & Retbleed slowdown 5.78--27.90\% \cite{retbleed2022}; InvisiSpec 21\% mean overhead vs.\ 74\% STT \cite{invisispec2018} & Operator, platform vendor & Recurring \\
+    TEE isolation & Proactive & Mixed & Module specific & Sanctum: +0.78\% gates, +1.9\% flip-flops \cite{sanctum2016}; Graphene-SGX: near-native to below 2x \cite{graphenesgx2017} & Vendor, integrator, operator & Upfront + recurring \\
+    Crypto acceleration & Proactive & Conditional & Module specific & OpenTitan AES up to 44x \cite{opentitan2024}; AES-NI 2--3x to 10x \cite{intel_aesni2012} & Vendor, integrator & Upfront + recurring \\
+    Rowhammer mitigations & Proactive & Mostly always-on & System-wide memory path & Disturbance characterization \cite{kim2014rowhammer}; TRRespass/Blacksmith bypass pressure \cite{trrespass2020,blacksmith2022} & Vendor, operator & Upfront + recurring \\
+    Memory safety mitigations & Proactive & Conditional checks & Module/workload-specific & Arm MTE deployment overhead guidance \cite{arm_mte2021}; CHERI migration tradeoffs \cite{cheri2015} & Vendor, integrator, operator & Upfront + recurring \\
+    Runtime detection/response & Reactive & Event-triggered & System-wide telemetry/recovery path & Firmware resiliency/recovery workflow requirements \cite{nist800193}; runtime platform instrumentation context \cite{opentitan2024} & Operator, integrator, customer & Recurring + contingent \\
     \bottomrule
   \end{tabular}
 \end{table*}
 
-\subsection{Interpretation Through RQ1--RQ4}
-For \textbf{RQ1}, the burden profile differs by family: speculation mitigations
-shift recurring cost to operators, while TEE and accelerator designs place large
-upfront burden on hardware and integration teams. For \textbf{RQ2}, the
-manifestation distinction is explicit: speculation controls are often always-on,
-TEE costs are mixed (fixed hardware plus conditional transitions), and
-accelerator gains are workload-triggered. For \textbf{RQ3}, opportunity-cost and
-externality pathways become visible when fixed silicon resources for security
-functions reduce alternative feature budgets. For \textbf{RQ4}, the ontology
-supports normalized cross-family comparison by encoding posture, activation,
-scope, bearer, and lifecycle timing in a shared schema.
+\subsection{Structured Worked Outputs}
+To avoid purely narrative treatment, each family is summarized as
+(\textit{tuple slice}, \textit{measured anchors}, \textit{inferred/synthetic
+allocations}, \textit{decision implication}) in
+Table~\ref{tab:worked-structured}.
 
-A complementary TEE software datapoint reinforces this distribution: Graphene-SGX
-reports performance from near-native up to less than 2x overhead for most
-single-process workloads, showing that software adaptation burden is highly
-workload-dependent even when hardware support is fixed \cite{graphenesgx2017}.
+\begin{table*}[t]
+  \caption{Worked case outputs with explicit data slices and decision implications.}
+  \label{tab:worked-structured}
+  \centering
+  \scriptsize
+  \setlength{\tabcolsep}{3pt}
+  \begin{tabular}{p{0.13\textwidth}p{0.13\textwidth}p{0.20\textwidth}p{0.23\textwidth}p{0.23\textwidth}}
+    \toprule
+    Family & Tuple slice & Measured anchors (E1/Measured) & Inferred or synthetic allocations (E2/E3) & Decision implication \\
+    \midrule
+    Speculation controls & \texttt{S01--S20} & Runtime overhead and ops burden anchors from Retbleed \cite{retbleed2022} & Transfer/externalized burdens under alternative mitigation assumptions from InvisiSpec-context rows \cite{invisispec2018} & ``Best local runtime'' and ``lowest transferred burden'' can diverge. \\
+    TEE isolation & \texttt{T21--T40} & Hardware increments and selected runtime behavior anchors from Sanctum \cite{sanctum2016} & Integration and downstream burden variation from Graphene-SGX style adaptation contexts \cite{graphenesgx2017} & Upfront provisioning and recurring adaptation must be jointly optimized. \\
+    Crypto acceleration & \texttt{C41--C60} & Crypto-path speedups and area footprints from OpenTitan/AES-NI \cite{opentitan2024,intel_aesni2012} & Opportunity and transfer effects for non-crypto workloads and operations \cite{intel_xeon_crypto2017} & Acceleration benefit does not remove system-level opportunity cost. \\
+    Rowhammer mitigations & \texttt{R61--R80} & Disturbance and defense-pressure anchors from ISCA/SP evidence \cite{kim2014rowhammer,trrespass2020,blacksmith2022} & Validation refresh and externalized reliability burden in E2/E3 rows & Durability costs can dominate one-time mitigation overhead. \\
+    Memory safety & \texttt{M81--M100} & Runtime and deployment anchors from MTE/CHERI sources \cite{arm_mte2021,cheri2015} & Toolchain migration and transfer/externality terms in E2/E3 rows & Adoption economics materially affect mechanism ranking. \\
+    Runtime detection/response & \texttt{D101--D120} & None in current seed (deliberately no E1 reactive rows) & Recovery-time burden, contractual spillover, and contingent loss terms from inferred/synthetic rows \cite{nist800193,anderson2006economics} & Reactive controls expose contingent burden that proactive-only views miss. \\
+    \bottomrule
+  \end{tabular}
+\end{table*}
 
-\subsection{Dataset-Building Next Step}
-The next increment is to convert these seeded measurements into normalized
-tuples (\textit{mechanism}, \textit{cost type}, \textit{stakeholder},
-\textit{time}, \textit{magnitude}, \textit{evidence grade}) and extend coverage
-to at least 60 tuples across the same three families.
+\subsection{Worked Family Notes}
+\textbf{Speculation controls (\texttt{S01--S20}).}
+Always-on behavior and system-wide scope produce recurring operator burden. The
+seed includes a concrete decision-delta: \texttt{C57} (better local runtime)
+versus \texttt{C52} (lower transfer burden) demonstrates objective-dependent
+choice.
+
+\textbf{TEE isolation (\texttt{T21--T40}).}
+TEE rows show mixed manifestation: upfront hardware/verification and recurring
+runtime adaptation. This family prevents collapse into a single ``TEE overhead''
+scalar by forcing separate burden channels.
+
+\textbf{Crypto acceleration (\texttt{C41--C60}).}
+This family encodes both acceleration gains and opportunity costs.
+Allocation-aware analysis keeps ``faster crypto path'' and ``foregone
+general-purpose capacity'' in the same decision view.
+
+\textbf{Rowhammer mitigations (\texttt{R61--R80}).}
+These rows model mitigation durability pressure: bypass research implies
+recurring validation and refresh burden even when first-generation controls are
+deployed.
+
+\textbf{Memory safety mitigations (\texttt{M81--M100}).}
+Rows mix hardware support, toolchain integration, and migration costs. The
+family is useful because burden incidence can move between vendor, integrator,
+and operator depending on rollout strategy.
+
+\textbf{Runtime detection/response (\texttt{D101--D120}).}
+This reactive family captures event-triggered and contingent burden channels
+that are absent from proactive-only corpora: incident handling, recovery
+operations, contractual penalties, and reputation effects \cite{nist800193}.
+
+\subsection{Incident Linkage for CQ4}
+Incident tuples (\texttt{I01--I12}) encode observed/seeded losses linked to
+families with attribution confidence and provenance. This enables executable
+loss-linkage queries instead of treating attribution as future work.
+
+\subsection{Community Value}
+The structured format above is reusable: each family can be extended with
+additional rows without changing schema, and review can target concrete tuple
+claims rather than prose-only argument. That improves comparability across
+architecture, systems-security, and policy analyses.
+
+\subsection{Seed Artifact Status}
+The current release is still a seed dataset, not a final benchmark corpus:
+120 cost tuples, 12 incident tuples, explicit data-origin labels, and full CQ
+coverage under executable checks. This is enough for methodological validation,
+while still requiring broader source-complete expansion for benchmark-grade
+conclusions.

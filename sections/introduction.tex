@@ -6,6 +6,13 @@ cloud operators, users, and regulators) and across time (upfront design effort
 versus contingent incident losses). This paper develops a structured ontology to
 unify these costs and make tradeoffs explicit.
 
+In this paper, \emph{ontology} can be read as a rigorous shared data model:
+named entity types (for example mechanism, stakeholder, cost) and typed
+relationships between them. For readers with a hardware-systems background, the
+closest intuition is a normalized schema plus explicit integrity constraints and
+query semantics. The goal is not philosophical classification; the goal is
+decision support.
+
 \subsection{Research Questions}
 This paper is guided by four research questions:
 \begin{itemize}
@@ -17,8 +24,13 @@ This paper is guided by four research questions:
 
 \subsection{Contributions}
 \begin{itemize}
+  \item A paradigm claim that hardware security mechanisms should be evaluated as both technical controls and risk-allocation instruments.
   \item A lifecycle-oriented taxonomy of security costs in hardware, spanning physical resource, engineering process, compliance, strategic, and externality costs.
-  \item A formal ontology design that links mechanisms, threats, stakeholders, and cost-bearing pathways with explicit temporal semantics.
+  \item A formal ontology design that links mechanisms, threats, stakeholders, cost-bearing pathways, and incident-loss linkage with explicit temporal semantics.
   \item A multi-stakeholder analytical framing that combines direct implementation costs, expected incident loss, and cost externalization.
-  \item A set of competency-question-driven evaluation goals for testing whether the ontology supports policy and architecture decision use cases.
+  \item An executable artifact pipeline that regenerates CQ outcomes, sensitivity checks, and VOI priorities from seed datasets with explicit data-origin labels.
 \end{itemize}
+
+The remainder of the paper introduces scope and prior work, defines the ontology
+and analytical framework, presents evidence-grounded case studies, and evaluates
+coverage and utility against the competency-question set.

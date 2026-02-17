@@ -3,7 +3,9 @@
   title     = {UCO: A Unified Cybersecurity Ontology},
   booktitle = {AAAI Workshop on Artificial Intelligence for Cyber Security (AICS)},
   year      = {2016},
-  publisher = {AAAI Press}
+  publisher = {AAAI Press},
+  address   = {Phoenix, AZ, USA},
+  numpages  = {8}
 }
 
 @misc{case2024,
@@ -31,7 +33,8 @@
   author    = {Mohammad Tehranipoor and Cliff Wang},
   title     = {Introduction to Hardware Security and Trust},
   publisher = {Springer},
-  year      = {2011}
+  year      = {2011},
+  address   = {New York, NY, USA}
 }
 
 @misc{costan2016intelsgx,
@@ -49,6 +52,7 @@
   pages     = {1--19},
   year      = {2019},
   publisher = {IEEE},
+  address   = {San Francisco, CA, USA},
   doi       = {10.1109/SP.2019.00002}
 }
 
@@ -58,7 +62,9 @@
   booktitle = {Proceedings of the 17th Annual Computer Security Applications Conference},
   pages   = {358--365},
   publisher = {IEEE},
-  year    = {2001}
+  year    = {2001},
+  address = {New Orleans, LA, USA},
+  doi     = {10.1109/ACSAC.2001.991552}
 }
 
 @article{anderson2006economics,
@@ -82,25 +88,33 @@
   year    = {1970}
 }
 
-@incollection{noy2001ontology,
+@techreport{noy2001ontology,
   author    = {Natalya F. Noy and Deborah L. McGuinness},
   title     = {Ontology Development 101: A Guide to Creating Your First Ontology},
-  booktitle = {Stanford Knowledge Systems Laboratory Technical Report KSL-01-05},
-  year      = {2001}
+  institution = {Stanford Knowledge Systems Laboratory},
+  number      = {KSL-01-05},
+  year        = {2001},
+  address     = {Stanford, CA, USA}
 }
 
-@article{fernandez1997methontology,
+@inproceedings{fernandez1997methontology,
   author  = {Mariano Fern{\'a}ndez-L{\'o}pez and Asunci{\'o}n G{\'o}mez-P{\'e}rez and Natalia Juristo},
   title   = {METHONTOLOGY: From Ontological Art Towards Ontological Engineering},
-  journal = {Proceedings of the AAAI Spring Symposium Series},
-  year    = {1997}
+  booktitle = {AAAI Spring Symposium on Ontological Engineering},
+  year    = {1997},
+  address = {Stanford, CA, USA},
+  publisher = {AAAI Press},
+  numpages  = {12}
 }
 
-@article{gruninger1995methodology,
+@inproceedings{gruninger1995methodology,
   author  = {Michael Gr{\"u}ninger and Mark S. Fox},
   title   = {Methodology for the Design and Evaluation of Ontologies},
-  journal = {IJCAI-95 Workshop on Basic Ontological Issues in Knowledge Sharing},
-  year    = {1995}
+  booktitle = {IJCAI-95 Workshop on Basic Ontological Issues in Knowledge Sharing},
+  year    = {1995},
+  address = {Montreal, Quebec, Canada},
+  publisher = {IJCAI},
+  numpages  = {12}
 }
 
 @incollection{guarino2009ontoclean,
@@ -109,7 +123,8 @@
   booktitle = {Handbook on Ontologies},
   publisher = {Springer},
   year      = {2009},
-  pages     = {201--220}
+  pages     = {201--220},
+  address   = {Berlin, Germany}
 }
 
 @inproceedings{retbleed2022,
@@ -121,6 +136,7 @@
   pages     = {3309--3326},
   url       = {https://www.usenix.org/conference/usenixsecurity22/presentation/koruyeh},
   publisher = {USENIX Association},
+  address   = {Boston, MA, USA},
   month     = aug
 }
 
@@ -133,6 +149,7 @@
   pages     = {857--874},
   url       = {https://www.usenix.org/conference/usenixsecurity16/technical-sessions/presentation/costan},
   publisher = {USENIX Association},
+  address   = {Austin, TX, USA},
   month     = aug
 }
 
@@ -145,6 +162,7 @@
   pages     = {645--658},
   url       = {https://www.usenix.org/conference/atc17/technical-sessions/presentation/tsai},
   publisher = {USENIX Association},
+  address   = {Santa Clara, CA, USA},
   month     = jul
 }
 
@@ -154,4 +172,89 @@
   howpublished = {arXiv preprint arXiv:2412.14317},
   year    = {2024},
   url     = {https://arxiv.org/abs/2412.14317}
+}
+
+@inproceedings{invisispec2018,
+  author    = {Yan, Mengjia and Choi, Jung Won and Skarlatos, Dimitrios and Morrison, Adam and Kim, Christopher W. Fletcher and Torrellas, Josep},
+  title     = {InvisiSpec: Making Speculative Execution Invisible in the Cache Hierarchy},
+  booktitle = {51st Annual IEEE/ACM International Symposium on Microarchitecture (MICRO)},
+  year      = {2018},
+  pages     = {428--441},
+  publisher = {IEEE},
+  address   = {Fukuoka, Japan},
+  doi       = {10.1109/MICRO.2018.00042}
+}
+
+@misc{intel_aesni2012,
+  author       = {{Intel Corporation}},
+  title        = {Advanced Encryption Standard (AES) Instructions Set},
+  year         = {2012},
+  howpublished = {\url{https://www.intel.com/content/www/us/en/developer/articles/tool/advanced-encryption-standard-instructions-aes-ni.html}}
+}
+
+@misc{intel_xeon_crypto2017,
+  author       = {{Intel Corporation}},
+  title        = {Intel Xeon Scalable Processors and Crypto-Algorithms in OpenSSL},
+  year         = {2017},
+  howpublished = {\url{https://builders.intel.com/university/course/intel-xeon-scalable-processors-and-crypto-algorithms-in-openssl-v1-1-0e/1000}}
+}
+
+@inproceedings{kim2014rowhammer,
+  author    = {Kim, Yoongu and Daly, Ross and Kim, Jeremie and Fallin, Chris and Lee, Ji Hye and Lee, Donghyuk and Wilkerson, Chris and Lai, Konrad and Mutlu, Onur},
+  title     = {Flipping Bits in Memory Without Accessing Them: An Experimental Study of DRAM Disturbance Errors},
+  booktitle = {41st Annual International Symposium on Computer Architecture (ISCA)},
+  year      = {2014},
+  pages     = {361--372},
+  publisher = {IEEE},
+  address   = {Minneapolis, MN, USA},
+  doi       = {10.1109/ISCA.2014.6853210}
+}
+
+@inproceedings{trrespass2020,
+  author    = {Frigo, Pietro and Vannacci, Cristiano and Hassan, Hamed and van der Veen, Victor and Mutlu, Onur and Giuffrida, Cristiano and Bos, Herbert and Razavi, Kaveh},
+  title     = {TRRespass: Exploiting the Many Sides of Target Row Refresh},
+  booktitle = {IEEE Symposium on Security and Privacy (SP)},
+  year      = {2020},
+  pages     = {747--762},
+  publisher = {IEEE},
+  address   = {San Francisco, CA, USA},
+  doi       = {10.1109/SP40000.2020.00013}
+}
+
+@inproceedings{blacksmith2022,
+  author    = {Jattke, Patrick and Razavi, Kaveh and Frigo, Pietro and Schilling, Luca and Kogler, Andreas and Weisse, Ofir and Bos, Herbert and Giuffrida, Cristiano},
+  title     = {Blacksmith: Scalable Rowhammering in the Frequency Domain},
+  booktitle = {IEEE Symposium on Security and Privacy (SP)},
+  year      = {2022},
+  pages     = {716--734},
+  publisher = {IEEE},
+  address   = {San Francisco, CA, USA},
+  doi       = {10.1109/SP46214.2022.9833717}
+}
+
+@misc{arm_mte2021,
+  author       = {{Arm Ltd.}},
+  title        = {Arm A-Profile Architecture Memory Tagging Extension},
+  year         = {2021},
+  howpublished = {\url{https://developer.arm.com/documentation/102585/latest/}}
+}
+
+@inproceedings{cheri2015,
+  author    = {Woodruff, Jonathan and Watson, Robert N. M. and Chisnall, David and Moore, Simon W. and Anderson, Jonathan and Davis, Ben and Laurie, Ben and Neumann, Peter G. and Norton, Robert and Roe, Michael},
+  title     = {The CHERI Capability Model: Revisiting RISC in an Age of Risk},
+  booktitle = {41st Annual International Symposium on Computer Architecture (ISCA)},
+  year      = {2014},
+  pages     = {457--468},
+  publisher = {IEEE},
+  address   = {Minneapolis, MN, USA},
+  doi       = {10.1109/ISCA.2014.6853221}
+}
+
+@techreport{nist800193,
+  author      = {Cooper, David and Regenscheid, Andrew and Fagan, Michael and others},
+  title       = {Platform Firmware Resiliency Guidelines},
+  institution = {National Institute of Standards and Technology},
+  number      = {NIST SP 800-193},
+  year        = {2018},
+  doi         = {10.6028/NIST.SP.800-193}
 }

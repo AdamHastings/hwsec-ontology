@@ -22,20 +22,48 @@ ex:ActivationProfile a owl:Class .
 ex:ScopeType a owl:Class .
 ex:WorkloadInteraction a owl:Class .
 ex:SecurityPosture a owl:Class .
+ex:MechanismFamily a owl:Class .
+ex:IncidentEvent a owl:Class .
+ex:DataOrigin a owl:Class .
+ex:MeasurementPriority a owl:Class .
 
-# Cost taxonomy
-ex:PhysicalResourceCost a owl:Class ; rdfs:subClassOf ex:CostType .
-ex:MicroarchitecturalPerformanceCost a owl:Class ; rdfs:subClassOf ex:CostType .
-ex:EngineeringLaborCost a owl:Class ; rdfs:subClassOf ex:CostType .
-ex:VerificationValidationCost a owl:Class ; rdfs:subClassOf ex:CostType .
-ex:ToolchainInfrastructureCost a owl:Class ; rdfs:subClassOf ex:CostType .
-ex:LifecycleOperationsCost a owl:Class ; rdfs:subClassOf ex:CostType .
-ex:ComplianceAssuranceCost a owl:Class ; rdfs:subClassOf ex:CostType .
-ex:OpportunityCost a owl:Class ; rdfs:subClassOf ex:CostType .
-ex:MarketContractualCost a owl:Class ; rdfs:subClassOf ex:CostType .
-ex:ReputationTrustCost a owl:Class ; rdfs:subClassOf ex:CostType .
-ex:LiabilityRedressCost a owl:Class ; rdfs:subClassOf ex:CostType .
-ex:ExternalityCost a owl:Class ; rdfs:subClassOf ex:CostType .
+# Explicit disjointness constraints
+[] a owl:AllDisjointClasses ;
+  owl:members (ex:ProactivePosture ex:ReactivePosture ex:HybridPosture) .
+[] a owl:AllDisjointClasses ;
+  owl:members (ex:AlwaysOnActivation ex:ConditionalActivation ex:EventTriggeredActivation) .
+[] a owl:AllDisjointClasses ;
+  owl:members (ex:Internalized ex:Transferred ex:Insured ex:Externalized) .
+
+# Cost type vocabulary (modeled as individuals to avoid class/instance punning)
+ex:PhysicalResourceCost a ex:CostType, owl:NamedIndividual .
+ex:MicroarchitecturalPerformanceCost a ex:CostType, owl:NamedIndividual .
+ex:EngineeringLaborCost a ex:CostType, owl:NamedIndividual .
+ex:VerificationValidationCost a ex:CostType, owl:NamedIndividual .
+ex:ToolchainInfrastructureCost a ex:CostType, owl:NamedIndividual .
+ex:LifecycleOperationsCost a ex:CostType, owl:NamedIndividual .
+ex:ComplianceAssuranceCost a ex:CostType, owl:NamedIndividual .
+ex:OpportunityCost a ex:CostType, owl:NamedIndividual .
+ex:MarketContractualCost a ex:CostType, owl:NamedIndividual .
+ex:ReputationTrustCost a ex:CostType, owl:NamedIndividual .
+ex:LiabilityRedressCost a ex:CostType, owl:NamedIndividual .
+ex:ExternalityCost a ex:CostType, owl:NamedIndividual .
+
+[] a owl:AllDifferent ;
+  owl:distinctMembers (
+    ex:PhysicalResourceCost
+    ex:MicroarchitecturalPerformanceCost
+    ex:EngineeringLaborCost
+    ex:VerificationValidationCost
+    ex:ToolchainInfrastructureCost
+    ex:LifecycleOperationsCost
+    ex:ComplianceAssuranceCost
+    ex:OpportunityCost
+    ex:MarketContractualCost
+    ex:ReputationTrustCost
+    ex:LiabilityRedressCost
+    ex:ExternalityCost
+  ) .
 
 # Stakeholder taxonomy
 ex:ChipVendor a owl:Class ; rdfs:subClassOf ex:Stakeholder .
@@ -61,6 +89,11 @@ ex:Externalized a owl:Class ; rdfs:subClassOf ex:BearingMode .
 ex:MeasuredEvidence a owl:Class ; rdfs:subClassOf ex:EvidenceType .
 ex:EstimatedEvidence a owl:Class ; rdfs:subClassOf ex:EvidenceType .
 ex:ExpertElicitedEvidence a owl:Class ; rdfs:subClassOf ex:EvidenceType .
+
+# Data-origin taxonomy
+ex:MeasuredOrigin a owl:Class ; rdfs:subClassOf ex:DataOrigin .
+ex:InferredOrigin a owl:Class ; rdfs:subClassOf ex:DataOrigin .
+ex:SyntheticOrigin a owl:Class ; rdfs:subClassOf ex:DataOrigin .
 
 # Cost manifestation taxonomy
 ex:AlwaysOnActivation a owl:Class ; rdfs:subClassOf ex:ActivationProfile .
@@ -109,6 +142,10 @@ ex:hasEvidenceType a owl:ObjectProperty ;
   rdfs:domain ex:Cost ;
   rdfs:range ex:EvidenceType .
 
+ex:hasDataOrigin a owl:ObjectProperty ;
+  rdfs:domain ex:Cost ;
+  rdfs:range ex:DataOrigin .
+
 ex:hasActivationProfile a owl:ObjectProperty ;
   rdfs:domain ex:Cost ;
   rdfs:range ex:ActivationProfile .
@@ -129,6 +166,15 @@ ex:hasSecurityPosture a owl:ObjectProperty ;
   rdfs:domain ex:SecurityMechanism ;
   rdfs:range ex:SecurityPosture .
 
+ex:belongsToFamily a owl:ObjectProperty ;
+  rdfs:domain ex:SecurityMechanism ;
+  rdfs:range ex:MechanismFamily .
+
+ex:hasCostBearer a owl:ObjectProperty ;
+  rdfs:domain ex:SecurityMechanism ;
+  rdfs:range ex:Stakeholder ;
+  owl:propertyChainAxiom (ex:incursCost ex:borneBy) .
+
 ex:mitigatesThreat a owl:ObjectProperty ;
   rdfs:domain ex:SecurityMechanism ;
   rdfs:range ex:Threat .
@@ -136,6 +182,26 @@ ex:mitigatesThreat a owl:ObjectProperty ;
 ex:constrainsDesignSpace a owl:ObjectProperty ;
   rdfs:domain ex:Requirement ;
   rdfs:range ex:SecurityMechanism .
+
+ex:incidentThreat a owl:ObjectProperty ;
+  rdfs:domain ex:IncidentEvent ;
+  rdfs:range ex:Threat .
+
+ex:impactsStakeholder a owl:ObjectProperty ;
+  rdfs:domain ex:IncidentEvent ;
+  rdfs:range ex:Stakeholder .
+
+ex:linkedToMissingFamily a owl:ObjectProperty ;
+  rdfs:domain ex:IncidentEvent ;
+  rdfs:range ex:MechanismFamily .
+
+ex:prioritizesFamily a owl:ObjectProperty ;
+  rdfs:domain ex:MeasurementPriority ;
+  rdfs:range ex:MechanismFamily .
+
+ex:prioritizesCostType a owl:ObjectProperty ;
+  rdfs:domain ex:MeasurementPriority ;
+  rdfs:range ex:CostType .
 
 # Optional quantitative attributes
 ex:costValue a owl:DatatypeProperty ;
@@ -146,11 +212,87 @@ ex:costUnit a owl:DatatypeProperty ;
   rdfs:domain ex:Cost ;
   rdfs:range xsd:string .
 
+ex:sourceKey a owl:DatatypeProperty ;
+  rdfs:domain ex:Cost ;
+  rdfs:range xsd:string .
+
+ex:sourceLocator a owl:DatatypeProperty ;
+  rdfs:domain ex:Cost ;
+  rdfs:range xsd:string .
+
+ex:incidentLossValue a owl:DatatypeProperty ;
+  rdfs:domain ex:IncidentEvent ;
+  rdfs:range xsd:decimal .
+
+ex:incidentLossUnit a owl:DatatypeProperty ;
+  rdfs:domain ex:IncidentEvent ;
+  rdfs:range xsd:string .
+
+ex:attributionConfidence a owl:DatatypeProperty ;
+  rdfs:domain ex:IncidentEvent ;
+  rdfs:range xsd:decimal .
+
+ex:priorityScore a owl:DatatypeProperty ;
+  rdfs:domain ex:MeasurementPriority ;
+  rdfs:range xsd:decimal .
+
+# Minimum participation constraints
+ex:Cost rdfs:subClassOf
+  [ a owl:Restriction ;
+    owl:onProperty ex:hasCostType ;
+    owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+    owl:onClass ex:CostType
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty ex:borneBy ;
+    owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+    owl:onClass ex:Stakeholder
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty ex:realizedAt ;
+    owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+    owl:onClass ex:TimeHorizon
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty ex:hasBearingMode ;
+    owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+    owl:onClass ex:BearingMode
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty ex:hasDataOrigin ;
+    owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+    owl:onClass ex:DataOrigin
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty ex:sourceKey ;
+    owl:minCardinality "1"^^xsd:nonNegativeInteger
+  ] ,
+  [ a owl:Restriction ;
+    owl:onProperty ex:sourceLocator ;
+    owl:minCardinality "1"^^xsd:nonNegativeInteger
+  ] .
+
+ex:SecurityMechanism rdfs:subClassOf
+  [ a owl:Restriction ;
+    owl:onProperty ex:hasSecurityPosture ;
+    owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+    owl:onClass ex:SecurityPosture
+  ] .
+
+# Mechanism family vocabulary
+ex:SpeculationControlsFamily a ex:MechanismFamily, owl:NamedIndividual .
+ex:TrustedExecutionEnvironmentsFamily a ex:MechanismFamily, owl:NamedIndividual .
+ex:CryptoAcceleratorsFamily a ex:MechanismFamily, owl:NamedIndividual .
+ex:RowhammerMitigationsFamily a ex:MechanismFamily, owl:NamedIndividual .
+ex:MemorySafetyMitigationsFamily a ex:MechanismFamily, owl:NamedIndividual .
+ex:RuntimeDetectionResponseFamily a ex:MechanismFamily, owl:NamedIndividual .
+
 # Example individuals
 ex:SpeculationBarrier a ex:SecurityMechanism .
 ex:TransientExecutionAttack a ex:Threat .
 ex:SpeculationBarrier ex:mitigatesThreat ex:TransientExecutionAttack .
 ex:SpeculationBarrier ex:hasSecurityPosture ex:ProactivePostureExample .
+ex:SpeculationBarrier ex:belongsToFamily ex:SpeculationControlsFamily .
 
 ex:SpeculationBarrierPerfCost a ex:Cost ;
   ex:hasCostType ex:MicroarchitecturalPerformanceCost ;
@@ -158,27 +300,107 @@ ex:SpeculationBarrierPerfCost a ex:Cost ;
   ex:realizedAt ex:RecurringExample ;
   ex:hasBearingMode ex:InternalizedExample ;
   ex:hasEvidenceType ex:MeasuredEvidenceExample ;
+  ex:hasDataOrigin ex:MeasuredOriginExample ;
   ex:hasActivationProfile ex:AlwaysOnActivationExample ;
   ex:hasScopeType ex:SystemWideScopeExample ;
-  ex:hasWorkloadInteraction ex:DegradesGeneralWorkloadExample .
+  ex:hasWorkloadInteraction ex:DegradesGeneralWorkloadExample ;
+  ex:sourceKey "retbleed2022" ;
+  ex:sourceLocator "USENIX22:paper+bench" .
 
 ex:AesAccelerator a ex:SecurityMechanism .
 ex:AesAccelerator ex:hasSecurityPosture ex:ProactivePostureExample .
+ex:AesAccelerator ex:belongsToFamily ex:CryptoAcceleratorsFamily .
 ex:AesWorkloadCost a ex:Cost ;
   ex:hasCostType ex:PhysicalResourceCost ;
   ex:borneBy ex:ChipVendorExample ;
   ex:realizedAt ex:UpfrontExample ;
   ex:hasBearingMode ex:InternalizedExample ;
+  ex:hasDataOrigin ex:MeasuredOriginExample ;
   ex:hasActivationProfile ex:ConditionalActivationExample ;
   ex:hasScopeType ex:ModuleSpecificScopeExample ;
   ex:hasWorkloadInteraction ex:MixedWorkloadInteractionExample ;
+  ex:sourceKey "intel_aesni2012" ;
+  ex:sourceLocator "IntelAESNI:perf-guidance" ;
   ex:hasCounterfactualAlternative ex:GeneralComputeOpportunityCost .
 
 ex:GeneralComputeOpportunityCost a ex:Cost ;
   ex:hasCostType ex:OpportunityCost ;
   ex:borneBy ex:EnterpriseCustomerExample ;
   ex:realizedAt ex:RecurringExample ;
-  ex:hasBearingMode ex:InternalizedExample .
+  ex:hasBearingMode ex:InternalizedExample ;
+  ex:hasDataOrigin ex:MeasuredOriginExample ;
+  ex:sourceKey "intel_xeon_crypto2017" ;
+  ex:sourceLocator "IntelXeonCrypto:openssl-bench" .
+
+ex:RowhammerRefreshControl a ex:SecurityMechanism ;
+  ex:hasSecurityPosture ex:ProactivePostureExample ;
+  ex:belongsToFamily ex:RowhammerMitigationsFamily .
+ex:RowhammerBitFlipAttack a ex:Threat .
+ex:RowhammerRefreshControl ex:mitigatesThreat ex:RowhammerBitFlipAttack .
+ex:RowhammerRefreshCost a ex:Cost ;
+  ex:hasCostType ex:MicroarchitecturalPerformanceCost ;
+  ex:borneBy ex:CloudOperatorExample ;
+  ex:realizedAt ex:RecurringExample ;
+  ex:hasBearingMode ex:InternalizedExample ;
+  ex:hasEvidenceType ex:MeasuredEvidenceExample ;
+  ex:hasDataOrigin ex:MeasuredOriginExample ;
+  ex:hasActivationProfile ex:AlwaysOnActivationExample ;
+  ex:hasScopeType ex:SystemWideScopeExample ;
+  ex:hasWorkloadInteraction ex:DegradesGeneralWorkloadExample ;
+  ex:sourceKey "trrespass2020" ;
+  ex:sourceLocator "SP20:TRR-bypass-eval" .
+ex:RowhammerRefreshControl ex:incursCost ex:RowhammerRefreshCost .
+
+ex:MemoryTaggingEnforcement a ex:SecurityMechanism ;
+  ex:hasSecurityPosture ex:ProactivePostureExample ;
+  ex:belongsToFamily ex:MemorySafetyMitigationsFamily .
+ex:MemoryCorruptionAttack a ex:Threat .
+ex:MemoryTaggingEnforcement ex:mitigatesThreat ex:MemoryCorruptionAttack .
+ex:MemorySafetyRuntimeCost a ex:Cost ;
+  ex:hasCostType ex:MicroarchitecturalPerformanceCost ;
+  ex:borneBy ex:CloudOperatorExample ;
+  ex:realizedAt ex:RecurringExample ;
+  ex:hasBearingMode ex:InternalizedExample ;
+  ex:hasEvidenceType ex:MeasuredEvidenceExample ;
+  ex:hasDataOrigin ex:MeasuredOriginExample ;
+  ex:hasActivationProfile ex:ConditionalActivationExample ;
+  ex:hasScopeType ex:ModuleSpecificScopeExample ;
+  ex:hasWorkloadInteraction ex:MixedWorkloadInteractionExample ;
+  ex:sourceKey "arm_mte2021" ;
+  ex:sourceLocator "ArmMTE:perf-guidance" .
+ex:MemoryTaggingEnforcement ex:incursCost ex:MemorySafetyRuntimeCost .
+
+ex:RuntimeAlertRecovery a ex:SecurityMechanism ;
+  ex:hasSecurityPosture ex:ReactivePostureExample ;
+  ex:belongsToFamily ex:RuntimeDetectionResponseFamily .
+ex:RuntimeCompromiseAttack a ex:Threat .
+ex:RuntimeAlertRecovery ex:mitigatesThreat ex:RuntimeCompromiseAttack .
+ex:RuntimeRecoveryOpsCost a ex:Cost ;
+  ex:hasCostType ex:LifecycleOperationsCost ;
+  ex:borneBy ex:CloudOperatorExample ;
+  ex:realizedAt ex:RecurringExample ;
+  ex:hasBearingMode ex:InternalizedExample ;
+  ex:hasEvidenceType ex:EstimatedEvidenceExample ;
+  ex:hasDataOrigin ex:InferredOriginExample ;
+  ex:hasActivationProfile ex:EventTriggeredActivationExample ;
+  ex:hasScopeType ex:SystemWideScopeExample ;
+  ex:hasWorkloadInteraction ex:MixedWorkloadInteractionExample ;
+  ex:sourceKey "nist800193" ;
+  ex:sourceLocator "NIST800-193:sec3-5" .
+ex:RuntimeAlertRecovery ex:incursCost ex:RuntimeRecoveryOpsCost .
+
+ex:IncidentRuntimeRecoveryGap a ex:IncidentEvent ;
+  ex:incidentThreat ex:RuntimeCompromiseAttack ;
+  ex:impactsStakeholder ex:CloudOperatorExample ;
+  ex:linkedToMissingFamily ex:RuntimeDetectionResponseFamily ;
+  ex:incidentLossValue "5.60"^^xsd:decimal ;
+  ex:incidentLossUnit "million_usd_estimate" ;
+  ex:attributionConfidence "0.66"^^xsd:decimal .
+
+ex:PriorityRuntimeOps a ex:MeasurementPriority ;
+  ex:prioritizesFamily ex:RuntimeDetectionResponseFamily ;
+  ex:prioritizesCostType ex:LifecycleOperationsCost ;
+  ex:priorityScore "7.00"^^xsd:decimal .
 
 ex:CloudOperatorExample a ex:CloudOperator .
 ex:ChipVendorExample a ex:ChipVendor .
@@ -187,13 +409,23 @@ ex:UpfrontExample a ex:Upfront .
 ex:RecurringExample a ex:Recurring .
 ex:InternalizedExample a ex:Internalized .
 ex:MeasuredEvidenceExample a ex:MeasuredEvidence .
+ex:EstimatedEvidenceExample a ex:EstimatedEvidence .
+ex:MeasuredOriginExample a ex:MeasuredOrigin .
+ex:InferredOriginExample a ex:InferredOrigin .
+ex:SyntheticOriginExample a ex:SyntheticOrigin .
 ex:AlwaysOnActivationExample a ex:AlwaysOnActivation .
 ex:ConditionalActivationExample a ex:ConditionalActivation .
+ex:EventTriggeredActivationExample a ex:EventTriggeredActivation .
 ex:SystemWideScopeExample a ex:SystemWideScope .
 ex:ModuleSpecificScopeExample a ex:ModuleSpecificScope .
 ex:DegradesGeneralWorkloadExample a ex:DegradesGeneralWorkload .
 ex:MixedWorkloadInteractionExample a ex:MixedWorkloadInteraction .
 ex:ProactivePostureExample a ex:ProactivePosture .
+ex:ReactivePostureExample a ex:ReactivePosture .
 
 ex:SpeculationBarrier ex:incursCost ex:SpeculationBarrierPerfCost .
 ex:AesAccelerator ex:incursCost ex:AesWorkloadCost .
+
+# Example inferred facts under reasoning:
+# 1) ex:SpeculationBarrier ex:hasCostBearer ex:CloudOperatorExample .
+# 2) ex:AesAccelerator ex:hasCostBearer ex:ChipVendorExample .
