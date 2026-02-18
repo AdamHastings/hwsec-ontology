@@ -1,0 +1,13 @@
+objective_id,objective_label,baseline_family,mechanism_family,objective_score,delta_vs_baseline,rank
+O1,Runtime-centric local-overhead minimization,SpeculationControls,MemorySafetyMitigations,0.0819,-0.0925,1
+O1,Runtime-centric local-overhead minimization,SpeculationControls,RowhammerMitigations,0.0857,-0.0888,2
+O1,Runtime-centric local-overhead minimization,SpeculationControls,RuntimeDetectionResponse,0.0936,-0.0808,3
+O1,Runtime-centric local-overhead minimization,SpeculationControls,CryptoAccelerators,0.1075,-0.0670,4
+O1,Runtime-centric local-overhead minimization,SpeculationControls,TrustedExecutionEnvironments,0.1495,-0.0249,5
+O1,Runtime-centric local-overhead minimization,SpeculationControls,SpeculationControls,0.1745,0.0000,6
+O2,Allocation-aware lifecycle burden minimization,SpeculationControls,MemorySafetyMitigations,0.1286,-0.1044,1
+O2,Allocation-aware lifecycle burden minimization,SpeculationControls,RowhammerMitigations,0.1307,-0.1023,2
+O2,Allocation-aware lifecycle burden minimization,SpeculationControls,CryptoAccelerators,0.1656,-0.0674,3
+O2,Allocation-aware lifecycle burden minimization,SpeculationControls,TrustedExecutionEnvironments,0.1905,-0.0425,4
+O2,Allocation-aware lifecycle burden minimization,SpeculationControls,RuntimeDetectionResponse,0.1926,-0.0404,5
+O2,Allocation-aware lifecycle burden minimization,SpeculationControls,SpeculationControls,0.2330,0.0000,6

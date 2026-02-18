@@ -1,7 +1,9 @@
 cq_id,status,coverage_metric,notes
 CQ1,pass,120/120 tuples include stakeholder + time + magnitude + unit + evidence + data_origin + source_key + source_locator,"Cost visibility by bearer, horizon, and row-level provenance is executable"
-CQ2,pass,120/120 tuples include bearing mode; Externalized=20,Internalized/transferred/externalized burden transfer is executable
-CQ3,pass,"6/6 families meet comparability rule (>=5 cost types, >=2 stakeholders, upfront+recurring)",Cross-family comparison is executable on shared burden dimensions
-CQ4,pass,12/12 incident tuples include family-linked loss + confidence + provenance,Incident-loss linkage is now represented in artifact form
+CQ2,pass,120/120 tuples include bearing mode; transfer-target coverage 54/54; Externalized=20,Internalized/transferred/externalized burden transfer is executable with explicit transfer targets
+CQ3,pass,2/2 objectives include explicit weights + baseline and yield ranked deltas,Comparative choice is anchored to objective-function weighting and baseline counterfactual
+CQ4,pass,12/12 incident tuples include loss + confidence + provenance + attribution evidence + linkage mechanism + counterfactual effect + residual-risk bearer,"Incident linkage distinguishes attribution evidence, linkage pathway, and counterfactual claim"
 CQ5,pass,Family ranking stable in both +/-20% E2/E3 perturbation directions,Sensitivity test is computed from seeded microperformance tuples
 CQ6,pass,VOI ranking computed for 40 family/cost cells,Information-gap prioritization is executable via uncertainty/transfer/incident scoring
+CQ7,pass,Internalized contradictions=0; transfer-target contradictions=0; inferred mechanism-bearer pairs=120,SHACL-equivalent consistency checks validate burden semantics beyond field presence
+CQ8,pass,20/20 OpportunityCost tuples include explicit alternative-use + foregone resource + benefit + design constraint,Opportunity cost is represented as explicit AlternativeUse nodes under design constraints

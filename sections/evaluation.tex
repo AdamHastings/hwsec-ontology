@@ -1,9 +1,12 @@
 \section{Evaluation Results}
 \subsection{Executed Workflow}
-The current release was evaluated using seven artifacts:
+The current release was evaluated using eleven artifacts:
 \path{ontology.ttl}, \path{artifacts/cost_tuples.csv},
 \path{artifacts/incident_tuples.csv}, \path{artifacts/cq_queries.sparql},
-\path{artifacts/cq_results.csv}, \path{artifacts/voi_priorities.csv}, and
+\path{artifacts/objective_weights.csv}, \path{artifacts/constraints.shacl.ttl},
+\path{artifacts/cq_results.csv}, \path{artifacts/voi_priorities.csv},
+\path{artifacts/objective_comparisons.csv},
+\path{artifacts/shacl_results.csv}, and
 \path{artifacts/sensitivity_rankings.csv}. We regenerate CQ outputs from data
 with \texttt{scripts/generate\_cq\_results.py} and then run integrity and
 distribution checks via \texttt{make repro}.
@@ -11,18 +14,24 @@ distribution checks via \texttt{make repro}.
 \subsection{Artifact Integrity Results}
 The seed cost dataset contains 120 tuples across six mechanism families (20 per
 family) with no missing values in key analysis fields (family, cost type, time
-horizon, bearing mode, evidence grade, data origin, source key, source
-locator). Distribution is: 59 E1, 39 E2, and 22 E3 rows; 59 Measured, 39
+horizon, bearing mode, decision-maker, evidence grade, data origin, source key,
+source locator). Distribution is: 59 E1, 39 E2, and 22 E3 rows; 59 Measured, 39
 Inferred, and 22 Synthetic rows; 54 upfront, 60 recurring, 4 contingent, and 2
 deferred rows; 66 internalized, 34 transferred, and 20 externalized rows.
 
 Incident linkage contains 12 tuples with complete family-linked loss,
-confidence, and provenance fields (8 E2/Inferred and 4 E3/Synthetic).
+confidence, provenance, attribution-evidence, linkage-mechanism, and
+counterfactual-effect fields plus explicit residual-risk bearers
+(8 E2/Inferred and 4 E3/Synthetic).
 
 \subsection{Competency-Question Coverage Results}
-All six CQs are executable in the current release through generated artifacts.
-CQ4 and CQ6 moved from partial to pass because incident-linkage tuples and VOI
-ranking are now part of the artifact pipeline.
+All eight CQs are executable in the current release through generated artifacts.
+CQ3 is now objective-function-driven with explicit baseline families, CQ4
+includes attribution/linkage/counterfactual subfields, CQ7 adds
+entailment-style consistency checks, and CQ8 enforces explicit opportunity-cost
+foregone-alternative descriptors.
+This means the burden-allocation instrument framing is no longer only
+conceptual: it is executable at artifact level.
 
 \begin{table}[t]
   \caption{Observed CQ coverage results from executable artifacts.}
@@ -35,11 +44,13 @@ ranking are now part of the artifact pipeline.
     CQ & Status & Coverage metric \\
     \midrule
     CQ1 (visibility) & Pass & 120/120 tuples include bearer, time, unit, evidence, data origin, and source provenance. \\
-    CQ2 (transfer) & Pass & 120/120 tuples include bearing mode (Externalized=20). \\
-    CQ3 (comparison) & Pass & 6/6 families satisfy shared comparability criteria. \\
-    CQ4 (attribution) & Pass & 12/12 incident tuples include family-linked loss, confidence, and provenance. \\
+    CQ2 (transfer) & Pass & 120/120 tuples include bearing mode; transfer-target coverage 54/54. \\
+    CQ3 (comparison) & Pass & 2/2 objectives include explicit weights + baseline and produce ranked deltas. \\
+    CQ4 (attribution) & Pass & 12/12 incident tuples include loss/confidence/provenance + attribution evidence + linkage mechanism + counterfactual effect + residual-risk bearer. \\
     CQ5 (sensitivity) & Pass & Family ranking stable under $\pm20\%$ E2/E3 perturbation. \\
     CQ6 (information gap) & Pass & VOI priorities computed for 40 family-cost cells. \\
+    CQ7 (entailment) & Pass & 0 internalized contradictions; 0 transfer-target contradictions; 120 inferred mechanism-bearer pairs. \\
+    CQ8 (opportunity) & Pass & 20/20 OpportunityCost tuples include explicit alternative-use + foregone resource, benefit, and design constraint. \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -60,7 +71,7 @@ seed-corpus scope.
     RQ1 & Security mechanisms induce heterogeneous burden classes across lifecycle phases, not a single scalar overhead. & 120 tuples spanning physical, performance, labor, operations, compliance, strategic, and externality costs across upfront/recurring/contingent/deferred horizons. \\
     RQ2 & A usable representation requires bearer, time horizon, bearing mode, evidence grade, data origin, and source provenance per row. & Complete field coverage in \texttt{cost\_tuples.csv} with executable CQ1--CQ2 checks. \\
     RQ3 & Transfer and externality semantics are necessary to model incentive misalignment in hardware-security choice. & 34 transferred and 20 externalized tuples; decision-delta examples where local-performance and allocation-aware choices diverge. \\
-    RQ4 & Cross-family comparison is feasible when families share posture, activation, scope, and burden schema. & CQ3 pass across six families, including one reactive family, on a shared burden representation. \\
+    RQ4 & Cross-family comparison is feasible when mechanisms are scored under explicit objective weights and a declared baseline. & CQ3 pass for both objective profiles with ranked family deltas in \texttt{artifacts/objective\_comparisons.csv}. \\
     \bottomrule
   \end{tabular}
 \end{table*}
@@ -70,6 +81,8 @@ Compared with prior proactive-only coverage, the reactive
 runtime-detection/response family adds contingent and deferred burden channels.
 This enables explicit proactive-versus-reactive portfolio discussion in the same
 schema, instead of treating posture as a descriptive label only.
+More broadly, it shows that mechanisms with similar local technical profiles can
+still behave as different burden-allocation instruments.
 
 \subsection{Sensitivity Results (CQ5)}
 Microarchitectural performance ranking was stable across baseline and
@@ -86,14 +99,23 @@ RuntimeDetectionResponse/ReputationTrustCost and transfer-heavy crypto,
 rowhammer, and memory-safety cells. Full ranking is emitted to
 \texttt{artifacts/voi\_priorities.csv}.
 
+\subsection{Consistency and Opportunity Results (CQ7--CQ8)}
+SHACL-equivalent consistency checks report zero contradictions for internalized
+bearer alignment and transfer-target distinctness; detailed rule outcomes are in
+\texttt{artifacts/shacl\_results.csv}. Opportunity-cost explicitness passes with
+20/20 rows carrying explicit alternative-use identifiers plus foregone
+resource, foregone benefit, and design-constraint fields.
+
 \subsection{Calibration of Claims}
 These results establish methodological execution, not final empirical
 ground truth. The corpus remains a seed dataset with mixed measured and
 inferred/synthetic rows, so conclusions should be read as demonstrating
 decision visibility and queryability rather than definitive market-level
-effect sizes.
+effect sizes. The current evidence supports the framing claim at method level
+(queryability, decision-delta potential, and allocation visibility), while
+leaving benchmark-grade effect estimation to future corpus expansion.
 
 \subsection{Reproducibility Outputs}
-Running \texttt{make repro} regenerates CQ/VOI/sensitivity artifacts and writes
-\texttt{artifacts/repro\_report.txt} with tuple counts, distribution checks, and
-CQ status summaries used in this section.
+Running \texttt{make repro} regenerates CQ/VOI/objective/SHACL/sensitivity
+artifacts and writes \texttt{artifacts/repro\_report.txt} with tuple counts,
+distribution checks, and CQ status summaries used in this section.

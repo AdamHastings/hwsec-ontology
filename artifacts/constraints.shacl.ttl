@@ -1,0 +1,64 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix ex: <https://example.org/hwsec-cost-ontology#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+ex:CostDecisionConsistencyShape
+  a sh:NodeShape ;
+  sh:targetClass ex:Cost ;
+  sh:sparql [
+    sh:message "Internalized cost must have decision-maker equal to bearer." ;
+    sh:select """
+      SELECT $this WHERE {
+        $this ex:hasBearingMode ex:Internalized ;
+              ex:decidedBy ?decisionMaker ;
+              ex:borneBy ?bearer .
+        FILTER (?decisionMaker != ?bearer)
+      }
+    """ ;
+  ] .
+
+ex:TransferTargetShape
+  a sh:NodeShape ;
+  sh:targetClass ex:Cost ;
+  sh:sparql [
+    sh:message "Transferred/externalized cost must have target distinct from decision-maker." ;
+    sh:select """
+      SELECT $this WHERE {
+        $this ex:hasBearingMode ?mode ;
+              ex:decidedBy ?decisionMaker .
+        FILTER (?mode = ex:Transferred || ?mode = ex:Externalized)
+        FILTER (
+          NOT EXISTS { $this ex:shiftedTo ?target . } ||
+          EXISTS { $this ex:shiftedTo ?target . FILTER (?target = ?decisionMaker) }
+        )
+      }
+    """ ;
+  ] .
+
+ex:CostEvidenceShape
+  a sh:NodeShape ;
+  sh:targetClass ex:Cost ;
+  sh:property [
+    sh:path ex:hasEvidenceType ;
+    sh:minCount 1 ;
+  ] .
+
+ex:OpportunityCounterfactualShape
+  a sh:NodeShape ;
+  sh:targetClass ex:OpportunityCostInstance ;
+  sh:property [
+    sh:path ex:hasForegoneAlternative ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path ex:foregoneResource ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path ex:foregoneBenefit ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path ex:designConstraint ;
+    sh:minCount 1 ;
+  ] .

@@ -1,8 +1,10 @@
-Generated: 2026-02-17T15:03:56Z
+Generated: 2026-02-18T17:57:05Z
 Tuples: 120
 Incident tuples: 12
 Families: 6
-CQ rows: 6
+CQ rows: 8
+Objective comparison rows: 12
+SHACL rule rows: 2
 Missing key fields: 0
 Missing incident fields: 0
 
@@ -28,4 +30,7 @@ Internalized,66
 Transferred,34
 
 [CQ status]
-pass,6
+pass,8
+
+[SHACL status]
+pass,2

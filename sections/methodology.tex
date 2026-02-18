@@ -3,12 +3,14 @@
 The methods section serves four goals: (1) make ontology construction
 reproducible, (2) justify modeling decisions as answers to explicit research
 questions, (3) define objective validation criteria, and (4) connect the
-resulting ontology to empirical analysis in hardware-security settings.
+resulting ontology to empirical analysis in hardware-security settings under the
+burden-allocation instrument framing.
 
 \subsection{Operational Interpretation}
 In this workflow, competency questions (CQs) serve as acceptance criteria for
 the model, OWL 2 DL provides formal schema semantics, and reasoner execution
-provides consistency and inference checks.
+provides consistency and inference checks; SHACL constraints provide explicit
+closed-world validation for tuple-level contradiction checks.
 
 \subsection{Ontology Engineering Process}
 We follow a competency-question-driven ontology workflow aligned with established
@@ -25,14 +27,21 @@ refinement).
 Competency questions (CQs) define what the ontology must answer
 \cite{gruninger1995methodology}. For this paper, CQs are designed to reduce
 decision opacity in hardware-security economics by improving cost visibility.
+Operationally, they test whether the mechanism-as-instrument framing is
+actually queryable.
 CQ1 asks for cost visibility by mechanism, stakeholder, lifecycle phase, unit,
 evidence grade, and source provenance. CQ2 asks which costs are internalized, transferred, or
-externalized, and to whom. CQ3 asks how mechanisms differ in burden
-distribution and opportunity cost for a fixed security objective. CQ4 asks
+externalized, and to whom. CQ3 asks how mechanisms differ under an explicit
+objective function (weight regime) and an explicit baseline family. CQ4 asks
 which observed incident losses are plausibly linked to missing or weakly
-adopted controls, with confidence annotation. CQ5 asks which uncertain
-assumptions most affect comparative conclusions. CQ6 asks which missing
-measurements would most reduce decision uncertainty.
+adopted controls, with explicit attribution-evidence type, linkage mechanism,
+and counterfactual effect annotation. CQ5 asks which uncertain assumptions most
+affect comparative conclusions. CQ6 asks which missing measurements would most
+reduce decision uncertainty. CQ7 asks whether burden semantics are consistent
+under entailment-style checks (for example, whether \textit{internalized}
+actually means bearer equals decision-maker). CQ8 asks whether every
+\textit{OpportunityCost} tuple links to an explicit \textit{AlternativeUse}
+node and names the foregone resource/benefit and binding design constraint.
 
 \subsection{CQ-to-Model Mapping}
 To make evaluation reproducible, each CQ is mapped to explicit conceptual
@@ -40,13 +49,18 @@ elements in the ontology. CQ1 maps to mechanism--cost--stakeholder--time
 relations with magnitude, unit, evidence, and provenance properties (source key
 and source locator). CQ2 maps to
 bearing-mode attributes and allocation relations
-(internalized/transferred/externalized). CQ3 maps to shared
-threat/requirement context with comparable burden vectors. CQ4 maps to
-incident-event entities linked to control absence/weakness, observed losses,
-and attribution confidence. CQ5 maps to uncertainty annotations and repeatable
-perturbation analysis over E2/E3 inputs. CQ6 maps to executable
-value-of-information (VOI) ranking over family-cost cells using uncertainty,
-transfer, and incident-link signals.
+(internalized/transferred/externalized). CQ3 maps to explicit objective-weight
+records and baseline-family selection, producing ranked family deltas under
+declared assumptions. CQ4 maps to incident-event entities linked to control
+absence/weakness, observed losses, attribution confidence, attribution evidence
+type, linkage mechanism, and counterfactual effect. CQ5 maps to uncertainty
+annotations and repeatable perturbation analysis over E2/E3 inputs. CQ6 maps to
+executable value-of-information (VOI) ranking over family-cost cells using
+uncertainty, transfer, and incident-link signals. CQ7 maps to semantic
+consistency rules over decision-maker, bearer, and transfer target fields.
+CQ8 maps to explicit foregone-alternative descriptors
+(alternative-use identifier, foregone resource, foregone benefit, and design
+constraint).
 
 \subsection{Formalization and Semantics}
 The ontology will be represented in OWL 2 DL to support automated consistency
@@ -75,8 +89,11 @@ at least one bearer and one realization time, and
 \textit{hasActivationProfile} is restricted to \textit{AlwaysOn},
 \textit{Conditional}, or \textit{EventTriggered}. Transfer semantics require
 that an \textit{externalized} cost be borne in part by a stakeholder distinct
-from the decision-maker. A property chain (\textit{incursCost} followed by
-\textit{borneBy}) implies a mechanism-level \textit{hasCostBearer} relation.
+from the decision-maker. Opportunity-cost semantics require explicit
+foregone-alternative descriptors (alternative-use identifier, foregone
+resource/benefit, and design constraint).
+A property chain (\textit{incursCost} followed by \textit{borneBy}) implies a
+mechanism-level \textit{hasCostBearer} relation.
 
 In description-logic style, a minimal fragment is:
 \begin{equation}
@@ -110,7 +127,9 @@ Beyond ontology completeness, evaluation requires three properties: decision
 delta (allocation-aware analysis changes at least some conclusions relative to
 local-overhead-only analysis), assumption visibility (weighting choices and
 transfer penalties are explicit and contestable), and disconfirmability (the
-paradigm claim specifies rejection conditions).
+paradigm claim specifies rejection conditions). Collectively, these criteria
+evaluate whether burden-allocation instrument reasoning changes real analytical
+outcomes.
 
 \subsection{Measurement Protocol}
 Each mapped cost instance includes a unit, uncertainty annotation, evidence
@@ -131,11 +150,13 @@ sensitivity range when E2 or E3 dominates.
 
 \subsection{Executable CQ Templates}
 To demonstrate question coverage, we provide executable query templates for CQ1
-through CQ6 in the companion artifact package and an artifact-generation script
+through CQ8 in the companion artifact package and an artifact-generation script
 that re-computes CQ outcomes from the seed datasets on every run
 (\texttt{scripts/generate\_cq\_results.py}).
 This script emits \texttt{artifacts/cq\_results.csv},
-\texttt{artifacts/voi\_priorities.csv}, and
+\texttt{artifacts/voi\_priorities.csv},
+\texttt{artifacts/objective\_comparisons.csv},
+\texttt{artifacts/shacl\_results.csv}, and
 \texttt{artifacts/sensitivity\_rankings.csv}, which are then validated via
 \texttt{make repro}. In the main paper, we report coverage and quality summaries
 rather than inlining long query listings in two-column text.

@@ -16,28 +16,50 @@ SELECT ?family ?stakeholder ?time ?costType ?value ?unit ?evidence ?dataOrigin ?
 
 # CQ2 (Burden transfer):
 # Which costs are internalized, transferred, or externalized, and to whom?
-SELECT ?bearingMode ?stakeholder (COUNT(?c) AS ?n) WHERE {
-  ?c ex:hasBearingMode ?bearingMode ; ex:borneBy ?stakeholder .
+SELECT ?bearingMode ?decisionMaker ?bearer ?transferTarget (COUNT(?c) AS ?n) WHERE {
+  ?c ex:hasBearingMode ?bearingMode ;
+     ex:decidedBy ?decisionMaker ;
+     ex:borneBy ?bearer .
+  OPTIONAL { ?c ex:shiftedTo ?transferTarget . }
 }
-GROUP BY ?bearingMode ?stakeholder
+GROUP BY ?bearingMode ?decisionMaker ?bearer ?transferTarget
 
-# CQ3 (Comparative choice):
-# For a fixed threat/security objective, how do mechanisms differ in burden profile?
-SELECT ?threat ?family ?stakeholder ?time ?costType WHERE {
-  ?m ex:mitigatesThreat ?threat ; ex:belongsToFamily ?family ; ex:incursCost ?c .
-  ?c ex:borneBy ?stakeholder ; ex:realizedAt ?time ; ex:hasCostType ?costType .
+# CQ3 (Comparative choice with explicit objective + baseline):
+# For an explicit objective function and baseline family, how do families rank?
+# Example weights below correspond to one row in artifacts/objective_weights.csv.
+SELECT ?objective ?baselineFamily ?family (SUM(?term) AS ?score) WHERE {
+  VALUES (?objective ?baselineFamily ?wPerf ?wLabor ?wOps ?wCompliance ?wOpportunity ?wTransfer) {
+    ("O2" ex:SpeculationControlsFamily 0.20 0.15 0.15 0.10 0.15 0.15)
+  }
+  ?m ex:belongsToFamily ?family ; ex:incursCost ?c .
+  ?c ex:hasCostType ?costType ; ex:hasBearingMode ?bearingMode .
+  BIND(
+    IF(?costType = ex:MicroarchitecturalPerformanceCost, ?wPerf,
+      IF(?costType IN (ex:PhysicalResourceCost, ex:EngineeringLaborCost, ex:VerificationValidationCost, ex:ToolchainInfrastructureCost), ?wLabor,
+        IF(?costType = ex:LifecycleOperationsCost, ?wOps,
+          IF(?costType IN (ex:ComplianceAssuranceCost, ex:MarketContractualCost, ex:LiabilityRedressCost, ex:ReputationTrustCost), ?wCompliance,
+            IF(?costType = ex:OpportunityCost, ?wOpportunity, 0.0)))))
+    AS ?baseWeight
+  )
+  BIND(IF(?bearingMode = ex:Transferred || ?bearingMode = ex:Externalized, ?wTransfer, 0.0) AS ?transferWeight)
+  BIND(?baseWeight + ?transferWeight AS ?term)
 }
-ORDER BY ?threat ?family ?stakeholder ?time
+GROUP BY ?objective ?baselineFamily ?family
+ORDER BY ?objective ?score
 
-# CQ4 (Loss attribution):
-# Which observed losses are plausibly linked to missing/weak controls?
-SELECT ?incident ?family ?stakeholder ?loss ?unit ?confidence WHERE {
+# CQ4 (Loss attribution with mechanism and counterfactual detail):
+# Which observed losses are linked to missing/weak controls, and how is linkage justified?
+SELECT ?incident ?family ?stakeholder ?residualRiskBearer ?loss ?unit ?confidence ?evidenceType ?linkage ?counterfactualEffect WHERE {
   ?incident a ex:IncidentEvent ;
             ex:linkedToMissingFamily ?family ;
             ex:impactsStakeholder ?stakeholder ;
+            ex:bearsResidualRisk ?residualRiskBearer ;
             ex:incidentLossValue ?loss ;
             ex:incidentLossUnit ?unit ;
-            ex:attributionConfidence ?confidence .
+            ex:attributionConfidence ?confidence ;
+            ex:hasAttributionEvidence ?evidenceType ;
+            ex:hasLinkageMechanism ?linkage ;
+            ex:hasCounterfactualEffect ?counterfactualEffect .
 }
 ORDER BY DESC(?confidence)
 
@@ -63,3 +85,29 @@ SELECT ?family ?costType (SUM(?score) AS ?voiScore) WHERE {
 }
 GROUP BY ?family ?costType
 ORDER BY DESC(?voiScore)
+
+# CQ7 (Entailment/consistency):
+# Which costs violate burden-allocation semantics?
+SELECT ?cost ?bearingMode ?decisionMaker ?bearer ?transferTarget WHERE {
+  ?cost a ex:Cost ;
+        ex:hasBearingMode ?bearingMode ;
+        ex:decidedBy ?decisionMaker ;
+        ex:borneBy ?bearer .
+  OPTIONAL { ?cost ex:shiftedTo ?transferTarget . }
+  FILTER(
+    (?bearingMode = ex:Internalized && ?decisionMaker != ?bearer) ||
+    ((?bearingMode = ex:Transferred || ?bearingMode = ex:Externalized) &&
+      (!BOUND(?transferTarget) || ?transferTarget = ?decisionMaker))
+  )
+}
+
+# CQ8 (Opportunity-cost explicitness):
+# For OpportunityCost tuples, what explicit alternative use was foregone and under which constraint?
+SELECT ?cost ?alternativeUse ?objective ?resource ?benefit ?constraint WHERE {
+  ?cost ex:hasCostType ex:OpportunityCost .
+  ?cost ex:hasForegoneAlternative ?alternativeUse ;
+        ex:foregoneResource ?resource ;
+        ex:foregoneBenefit ?benefit ;
+        ex:designConstraint ?constraint .
+  OPTIONAL { ?alternativeUse ex:wouldHaveImprovedObjective ?objective . }
+}

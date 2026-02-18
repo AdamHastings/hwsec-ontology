@@ -1,6 +1,7 @@
 \section{Analytical Framework}
 \subsection{Decision Rules}
-We compare two explicit decision rules. \textbf{Local-overhead logic} optimizes
+Under the burden-allocation instrument framing, we compare two explicit decision
+rules. \textbf{Local-overhead logic} optimizes
 primarily on mechanism-local deltas (for example runtime, power, or area).
 \textbf{Allocation-aware logic} optimizes lifecycle burden allocation across
 stakeholders and time horizons, including transfer and externality terms.
@@ -17,7 +18,8 @@ C_{\text{total}} =\;& C_{\text{direct}} + \mathbb{E}[L_{\text{incident}}] + C_{\
 This equation is intended as an accounting checklist, not a claim that every
 term can be estimated with equal confidence. Its purpose is to prevent common
 omissions (for example, counting local PPA impact while ignoring externalized
-incident burden).
+incident burden). In this sense, the equation operationalizes the mechanism-as-
+instrument view into auditable accounting terms.
 
 \subsection{Formal Comparison}
 \begin{equation}
@@ -28,6 +30,9 @@ incident burden).
 \end{equation}
 where $C_{s,t}(m)$ is burden borne by stakeholder $s$ at lifecycle phase $t$,
 and $w_{s,t}$ is a stakeholder-time weighting policy.
+The shift from $\textit{Rule}_{\text{local}}$ to $\textit{Rule}_{\text{alloc}}$
+is exactly the shift from technical-control framing to burden-allocation
+instrument framing.
 
 \subsection{Information-Gap Prioritization}
 To reduce decision uncertainty, we rank family-cost cells for additional

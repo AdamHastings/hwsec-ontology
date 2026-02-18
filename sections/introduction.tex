@@ -1,30 +1,59 @@
 \section{Introduction}
-Hardware security decisions are frequently framed as technical tradeoffs (for
-example, performance versus protection), but this framing is incomplete.
-Security costs are distributed unevenly across actors (chip vendors, OEMs,
-cloud operators, users, and regulators) and across time (upfront design effort
-versus contingent incident losses). This paper develops a structured ontology to
-unify these costs and make tradeoffs explicit.
+Hardware and systems security mechanisms are often evaluated as local technical
+tradeoffs (for example, performance, power, and area versus protection), but
+this view is incomplete. In practice, security costs are distributed across
+stakeholders and across time: a control that looks efficient at design time can
+still shift recurring operations burden, compliance burden, or contingent
+incident loss to other actors later in the lifecycle.
 
-In this paper, \emph{ontology} can be read as a rigorous shared data model:
-named entity types (for example mechanism, stakeholder, cost) and typed
-relationships between them. For readers with a hardware-systems background, the
-closest intuition is a normalized schema plus explicit integrity constraints and
-query semantics. The goal is not philosophical classification; the goal is
-decision support.
+This gap creates decision opacity. Architecture teams, operators, and policy
+actors routinely make high-impact choices under uncertainty, yet most evidence
+is reported as mechanism-local overhead rather than burden allocation. The
+result is a persistent ``fog of war'' in hardware-security economics: who
+decides, who pays, who benefits, and who bears residual risk are often not
+explicit in the decision record. Reducing that fog requires a representation
+that makes these roles and transfers computable, not only narratively
+described.
+
+This paper presents an ontology for costs in hardware and systems security,
+framed around the claim that security mechanisms act as
+\emph{burden-allocation instruments}. For hardware-security readers, the
+ontology can be read as a rigorously typed shared data model: explicit entity
+types, explicit relations, and explicit constraints over mechanism, cost,
+stakeholder, time horizon, and evidence.
+
+Building on that model, the paper defines an analytical framework that compares
+mechanisms under two decision logics: local-overhead optimization and
+allocation-aware optimization. This makes objective functions, baseline
+assumptions, and transfer/externality terms explicit, so disagreements about
+mechanism choice can be traced to assumptions instead of hidden in prose.
+
+The paper then grounds the model in an executable artifact pipeline and a seed
+corpus spanning six mechanism families (speculation controls, TEEs, crypto
+acceleration, rowhammer mitigations, memory-safety mitigations, and reactive
+runtime detection/response), plus incident-linkage tuples. Competency questions
+are used as acceptance tests for visibility, transfer semantics, comparison,
+attribution, sensitivity, information-gap ranking, consistency checks, and
+opportunity-cost explicitness.
+
+Finally, we report what this seed release establishes and what it does not. It
+establishes methodological feasibility for allocation-aware, ontology-backed
+security-cost analysis; it does not claim final benchmark-grade effect sizes.
+The contribution is therefore a decision framework and executable methodology
+for exposing burden pathways that local-overhead analyses routinely miss.
 
 \subsection{Research Questions}
 This paper is guided by four research questions:
 \begin{itemize}
-  \item \textbf{RQ1}: What cost types are induced by hardware-security mechanisms across the design, deployment, and incident lifecycle?
+  \item \textbf{RQ1}: What cost types are induced when hardware-security mechanisms are modeled as burden-allocation instruments across the design, deployment, and incident lifecycle?
   \item \textbf{RQ2}: How should these costs be represented so that stakeholder, time horizon, and uncertainty are explicit?
   \item \textbf{RQ3}: Which relations are required to reason about risk transfer, externalities, and incentive misalignment?
-  \item \textbf{RQ4}: How can the ontology support comparable analysis across mechanisms with different technical overhead and governance context?
+  \item \textbf{RQ4}: How can the ontology support comparable instrument-level analysis across mechanisms with different technical overhead and governance context?
 \end{itemize}
 
 \subsection{Contributions}
 \begin{itemize}
-  \item A paradigm claim that hardware security mechanisms should be evaluated as both technical controls and risk-allocation instruments.
+  \item A central framing claim that hardware security mechanisms should be evaluated as burden-allocation instruments, not only as local technical controls.
   \item A lifecycle-oriented taxonomy of security costs in hardware, spanning physical resource, engineering process, compliance, strategic, and externality costs.
   \item A formal ontology design that links mechanisms, threats, stakeholders, cost-bearing pathways, and incident-loss linkage with explicit temporal semantics.
   \item A multi-stakeholder analytical framing that combines direct implementation costs, expected incident loss, and cost externalization.

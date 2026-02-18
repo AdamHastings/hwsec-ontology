@@ -1,0 +1,3 @@
+rule_id,description,violations,checked_rows,status,validator
+CQ7-R1,Internalized costs require decision-maker == bearer.,0,120,pass,shacl-equivalent
+CQ7-R2,Transferred/externalized costs require non-empty transfer target distinct from decision-maker.,0,120,pass,shacl-equivalent

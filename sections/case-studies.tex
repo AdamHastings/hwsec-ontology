@@ -5,13 +5,16 @@ practice. They test whether classes and relations are expressive enough for
 real mechanisms, and they expose burden pathways that mechanism-local reporting
 usually hides (transfer, externality, and delayed loss effects)
 \cite{anderson2001economics,anderson2006economics}.
+In other words, they test whether the burden-allocation instrument framing
+matches how mechanisms are engineered and deployed.
 
 \subsection{Case Design and Corpus}
 The seed corpus now covers six families (20 tuples each): speculation controls,
 TEEs, cryptographic accelerators, rowhammer mitigations, memory-safety
 mitigations, and reactive runtime detection/response controls. We additionally
 encode 12 incident-linkage tuples to connect weak/missing control families to
-loss observations with confidence annotations.
+loss observations with confidence annotations. Each family is treated as a
+distinct burden-allocation instrument profile.
 
 \subsection{Cross-Family Snapshot}
 Table~\ref{tab:worked-case} summarizes representative anchors and ontology
@@ -66,9 +69,9 @@ Table~\ref{tab:worked-structured}.
 \subsection{Worked Family Notes}
 \textbf{Speculation controls (\texttt{S01--S20}).}
 Always-on behavior and system-wide scope produce recurring operator burden. The
-seed includes a concrete decision-delta: \texttt{C57} (better local runtime)
-versus \texttt{C52} (lower transfer burden) demonstrates objective-dependent
-choice.
+seed shows decision-delta behavior where minimizing local runtime and
+minimizing transferred burden can select different tuples under different
+objective weights.
 
 \textbf{TEE isolation (\texttt{T21--T40}).}
 TEE rows show mixed manifestation: upfront hardware/verification and recurring
@@ -94,6 +97,8 @@ and operator depending on rollout strategy.
 This reactive family captures event-triggered and contingent burden channels
 that are absent from proactive-only corpora: incident handling, recovery
 operations, contractual penalties, and reputation effects \cite{nist800193}.
+It highlights that reactive mechanisms are burden-allocation instruments with
+different timing signatures than proactive mechanisms.
 
 \subsection{Incident Linkage for CQ4}
 Incident tuples (\texttt{I01--I12}) encode observed/seeded losses linked to

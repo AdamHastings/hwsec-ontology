@@ -1,3 +1,11 @@
+% Anonymous submission toggle:
+% - \anonsubmissiontrue  => anonymous submission build
+% - \anonsubmissionfalse => named draft / camera-ready build
+\newif\ifanonsubmission
+\anonsubmissiontrue
+\ifanonsubmission
+  \PassOptionsToClass{anonymous}{acmart}
+\fi
 \documentclass[sigconf]{acmart}
 
 \usepackage{amsmath}
@@ -10,7 +18,7 @@
 \acmConference[NSPW '26]{New Security Paradigms Workshop}{2026}{TBD}
 \acmBooktitle{Proceedings of the New Security Paradigms Workshop (NSPW '26)}
 
-\title{The Cost of Security in Computer Hardware and Architecture: An Ontology for Economic Visibility and Risk Allocation}
+\title{An Ontology of Costs in Hardware and Systems Security}
 
 \author{Author Name}
 \affiliation{%
@@ -26,8 +34,10 @@ Security in hardware and computer architecture is often treated as a feature,
 but in practice it manifests as a portfolio of costs: power, performance, die
 area, engineering effort, compliance overhead, schedule delay, and downstream
 reputational or market losses when failures occur. This paper proposes an
-ontology for these costs and sketches a framework for comparing security
-investments across stakeholders and timescales.
+ontology for these costs and advances a central framing: hardware security
+mechanisms should be treated as \emph{burden-allocation instruments}, not only
+as local technical controls. The paper sketches a framework for comparing
+security investments across stakeholders and timescales under this framing.
 \end{abstract}
 
 \maketitle
@@ -49,7 +59,7 @@ investments across stakeholders and timescales.
 \ccsdesc[500]{Security and privacy~Embedded systems security}
 \ccsdesc[300]{Security and privacy~Systems security}
 
-\keywords{hardware security, ontology, security economics, computer architecture, risk transfer}
+\keywords{hardware security, ontology, security economics, computer architecture, burden-allocation instruments, risk transfer}
 
 \input{sections/introduction}
 \input{sections/paradigm}

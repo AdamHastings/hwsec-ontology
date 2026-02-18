@@ -12,6 +12,8 @@ on cloud operators'' is represented as linked facts:
 \textit{SpeculationBarrier} \emph{incurs} a \textit{CostInstance}; that instance
 has type \textit{MicroarchitecturalPerformanceCost}, is \emph{borneBy}
 \textit{CloudOperator}, and is \emph{realizedAt} \textit{Recurring}.
+This representation is the concrete ontology form of the burden-allocation
+instrument view.
 
 \subsection{Core Entities}
 The model contains seven core entity families: assets/objectives (for example
@@ -30,8 +32,14 @@ each cost is \emph{borne by} one or more stakeholders, cost can be \emph{shifted
 to} another stakeholder, and cost is \emph{realized at} a lifecycle phase. The
 same graph also links mechanisms to threats they \emph{mitigate}, requirements
 to design constraints they \emph{impose}, and constraints to opportunity costs
-they \emph{induce}. Incident entities capture contingent and reputational losses,
-while incentive-misalignment relations capture systematic cost transfer.
+they \emph{induce}. Additional stakeholder-role relations capture who
+\emph{decides} (\textit{decidedBy}), who \emph{benefits}
+(\textit{benefits}), and who \emph{bears residual risk}
+(\textit{bearsResidualRisk}) when incidents occur. Incident entities capture
+contingent and reputational losses, while incentive-misalignment relations
+capture systematic cost transfer.
+Together, these relations treat each mechanism instance as an instrument that
+allocates burden and residual risk across an ecosystem.
 
 \subsection{Cost Taxonomy}
 We define cost as any measurable reduction in technical, organizational,
@@ -48,9 +56,10 @@ and externality cost imposed on non-deciding parties.
 
 \subsection{Cost-Bearing Dimensions}
 Each instantiated cost is annotated by bearer (vendor, integrator/OEM, cloud
-operator, enterprise customer, end user, regulator/public), timing (upfront,
-recurring, contingent, deferred), bearing mode (internalized, transferred,
-insured, externalized), and evidence type (measured, estimated, or
+operator, enterprise customer, end user, regulator/public), explicit
+decision-maker, transfer target (for transferred/externalized rows), timing
+(upfront, recurring, contingent, deferred), bearing mode (internalized,
+transferred, insured, externalized), and evidence type (measured, estimated, or
 expert-elicited), plus row-level provenance (\texttt{source\_key},
 \texttt{source\_locator}) and data-origin maturity
 (\texttt{Measured}/\texttt{Inferred}/\texttt{Synthetic}). This representation allows the same mechanism to carry
@@ -62,8 +71,11 @@ In addition to ``who pays,'' the ontology tracks \emph{how} costs manifest in
 operation through activation profile (always-on, conditional, or
 event-triggered), scope (system-wide versus module/workload-specific), workload
 interaction (improves, degrades, or redistributes performance by workload
-class), and counterfactual opportunity cost (which alternative capability would
-have used the same area, power, or budget). This distinction is essential for
+class), and foregone-alternative opportunity cost. Opportunity rows now link to an
+explicit \textit{AlternativeUse} node (for example, cache capacity expansion or
+general-compute acceleration) rather than only a cost-to-cost edge, while
+retaining backward-compatible links for legacy queries. This distinction is
+essential for
 mechanisms with mixed effects. A broad randomization control may impose
 near-constant overhead with wide scope, whereas a dedicated crypto block may
 accelerate cryptographic workloads while inducing system-level opportunity cost
@@ -109,7 +121,8 @@ companion artifact released with the paper materials, which provides canonical
 definitions for cost classes, stakeholder roles, and burden relations.
 The companion tuple artifact mirrors these semantics with explicit provenance
 fields so every quantitative claim can be traced to a citation key and source
-location tag. Companion incident and VOI artifacts extend this to loss
-attribution and measurement-priority analysis.
+location tag. Companion incident, objective-weight, and SHACL-rule artifacts
+extend this to attribution structure, explicit baseline comparison, and semantic
+consistency checking.
 With these semantics specified, the next section introduces the analytical
 framework used to compare mechanisms under alternative decision rules.
