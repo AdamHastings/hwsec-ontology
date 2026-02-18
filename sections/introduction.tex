@@ -42,6 +42,24 @@ security-cost analysis; it does not claim final benchmark-grade effect sizes.
 The contribution is therefore a decision framework and executable methodology
 for exposing burden pathways that local-overhead analyses routinely miss.
 
+\paragraph{Scope.}
+In this paper, security cost includes direct design overhead (area and energy),
+verification and validation effort, software/hardware co-design complexity,
+certification and compliance burden, opportunity cost from constrained design
+space, and post-incident costs (recall, liability, and reputational damage)
+\cite{anderson2001economics,anderson2006economics}. The system boundary covers
+security mechanisms and requirements that affect microarchitecture and SoC
+design, platform firmware and trusted boot chains, supply-chain assurance and
+lifecycle support, reactive detection/recovery pipelines, and product-level
+organizational decision-making.
+
+\paragraph{Non-goals.}
+To keep the first version tractable, we do not attempt a full treatment of
+software-only control economics without hardware or firmware coupling,
+geopolitical externalities beyond product and operator contexts, attacker-utility
+modeling in full game-theoretic detail, or jurisdiction-specific legal doctrine
+for liability allocation.
+
 \subsection{Research Questions}
 This paper is guided by four research questions:
 \begin{itemize}
@@ -60,6 +78,6 @@ This paper is guided by four research questions:
   \item An executable artifact pipeline that regenerates CQ outcomes, sensitivity checks, and VOI priorities from seed datasets with explicit data-origin labels.
 \end{itemize}
 
-The remainder of the paper introduces scope and prior work, defines the ontology
-and analytical framework, presents evidence-grounded case studies, and evaluates
+The remainder of the paper reviews prior work, defines the ontology and
+analytical framework, presents evidence-grounded case studies, and evaluates
 coverage and utility against the competency-question set.

@@ -76,7 +76,7 @@ seed-corpus scope.
   \end{tabular}
 \end{table*}
 
-\subsection{Decision-Delta and Reactive Coverage}
+\paragraph{Decision-delta and reactive coverage.}
 Compared with prior proactive-only coverage, the reactive
 runtime-detection/response family adds contingent and deferred burden channels.
 This enables explicit proactive-versus-reactive portfolio discussion in the same
@@ -84,7 +84,7 @@ schema, instead of treating posture as a descriptive label only.
 More broadly, it shows that mechanisms with similar local technical profiles can
 still behave as different burden-allocation instruments.
 
-\subsection{Sensitivity Results (CQ5)}
+\paragraph{Sensitivity results (CQ5).}
 Microarchitectural performance ranking was stable across baseline and
 $\pm20\%$ perturbations of E2/E3 values:
 CryptoAccelerators, RuntimeDetectionResponse, MemorySafetyMitigations,
@@ -92,21 +92,21 @@ RowhammerMitigations, TrustedExecutionEnvironments, SpeculationControls.
 This result is generated and recorded in
 \texttt{artifacts/sensitivity\_rankings.csv}.
 
-\subsection{VOI Results (CQ6)}
+\paragraph{VOI results (CQ6).}
 The VOI pipeline ranks high-value measurement gaps by uncertainty, transfer, and
 incident linkage. Top-ranked cells in the current seed release include
 RuntimeDetectionResponse/ReputationTrustCost and transfer-heavy crypto,
 rowhammer, and memory-safety cells. Full ranking is emitted to
 \texttt{artifacts/voi\_priorities.csv}.
 
-\subsection{Consistency and Opportunity Results (CQ7--CQ8)}
+\paragraph{Consistency and opportunity results (CQ7--CQ8).}
 SHACL-equivalent consistency checks report zero contradictions for internalized
 bearer alignment and transfer-target distinctness; detailed rule outcomes are in
 \texttt{artifacts/shacl\_results.csv}. Opportunity-cost explicitness passes with
 20/20 rows carrying explicit alternative-use identifiers plus foregone
 resource, foregone benefit, and design-constraint fields.
 
-\subsection{Calibration of Claims}
+\paragraph{Calibration of claims.}
 These results establish methodological execution, not final empirical
 ground truth. The corpus remains a seed dataset with mixed measured and
 inferred/synthetic rows, so conclusions should be read as demonstrating
@@ -115,7 +115,7 @@ effect sizes. The current evidence supports the framing claim at method level
 (queryability, decision-delta potential, and allocation visibility), while
 leaving benchmark-grade effect estimation to future corpus expansion.
 
-\subsection{Reproducibility Outputs}
+\paragraph{Reproducibility outputs.}
 Running \texttt{make repro} regenerates CQ/VOI/objective/SHACL/sensitivity
 artifacts and writes \texttt{artifacts/repro\_report.txt} with tuple counts,
 distribution checks, and CQ status summaries used in this section.
