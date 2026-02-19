@@ -6,21 +6,35 @@ stakeholders and across time: a control that looks efficient at design time can
 still shift recurring operations burden, compliance burden, or contingent
 incident loss to other actors later in the lifecycle.
 
-This gap creates decision opacity. Architecture teams, operators, and policy
-actors routinely make high-impact choices under uncertainty, yet most evidence
-is reported as mechanism-local overhead rather than burden allocation. The
-result is a persistent ``fog of war'' in hardware-security economics: who
-decides, who pays, who benefits, and who bears residual risk are often not
-explicit in the decision record. Reducing that fog requires a representation
-that makes these roles and transfers computable, not only narratively
-described.
+This gap creates \emph{allocation opacity}. Architecture teams, operators, and
+policy actors routinely make high-impact choices under uncertainty, yet most
+published evidence is reported as mechanism-local overhead rather than who
+bears which burdens, when they appear, and who receives the benefits. As a
+result, key roles---who decides, who pays, who benefits, and who bears residual
+risk---are often missing from the decision record. In this work, we
+operationalize allocation opacity as missing or untestable burden-allocation
+fields and relations, then evaluate its reduction using executable CQ checks.
+
+Opacity persists in part because it is convenient. Vendors can market
+``secure-by-default'' features while downstream integrators and operators pay
+integration and runtime costs. Organizations can justify controls as
+``required'' without recording the counterfactual---what capability was
+foregone under schedule, die-area, or power constraints. Compliance regimes can
+reward documentation that a control exists more than measurement of its
+marginal overhead or risk reduction. After incidents, ambiguity about whether a
+control was absent, weakly adopted, or bypassed can diffuse accountability.
+These incentive patterns make cost shifting common but hard to see
+\cite{anderson2001economics,anderson2006economics,akerlof1970lemons,hastings2020wac}.
 
 This paper presents an ontology for costs in hardware and systems security,
 framed around the claim that security mechanisms act as
-\emph{burden-allocation instruments}. For hardware-security readers, the
-ontology can be read as a rigorously typed shared data model: explicit entity
-types, explicit relations, and explicit constraints over mechanism, cost,
-stakeholder, time horizon, and evidence.
+\emph{burden-allocation instruments}. Here, ``ontology'' can be read as a
+rigorous shared data model: named entity types (mechanisms, stakeholders,
+costs), typed relations between them (incurs, borne by, shifted to, benefits),
+and constraints that prevent common omissions (for example, every cost entry
+must name at least one bearer and one time horizon). The goal is not
+classification for its own sake; the goal is decision support: a representation
+that makes burden pathways and counterfactuals explicit and queryable.
 
 Building on that model, the paper defines an analytical framework that compares
 mechanisms under two decision logics: local-overhead optimization and
@@ -33,8 +47,8 @@ corpus spanning six mechanism families (speculation controls, TEEs, crypto
 acceleration, rowhammer mitigations, memory-safety mitigations, and reactive
 runtime detection/response), plus incident-linkage tuples. Competency questions
 are used as acceptance tests for visibility, transfer semantics, comparison,
-attribution, sensitivity, information-gap ranking, consistency checks, and
-opportunity-cost explicitness.
+attribution structure, sensitivity, information-gap ranking, semantic
+consistency checks, and opportunity-cost explicitness.
 
 Finally, we report what this seed release establishes and what it does not. It
 establishes methodological feasibility for allocation-aware, ontology-backed

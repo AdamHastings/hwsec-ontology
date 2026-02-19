@@ -1,7 +1,9 @@
 \section{Background and Related Work}
 \subsection{Ontology Primer for Hardware Security Readers}
 Because ontology language can be unfamiliar outside knowledge-representation
-communities, we fix terminology up front. A \textbf{class} denotes a category
+communities, we fix terminology up front
+\cite{noy2001ontology,gruninger1995methodology,guarino2009ontoclean}. A
+\textbf{class} denotes a category
 (for example, \textit{SecurityMechanism}, \textit{Stakeholder},
 \textit{Cost}); an \textbf{individual} denotes a concrete instance (for
 example, a specific TEE deployment cost entry); a \textbf{property} denotes a
@@ -9,7 +11,7 @@ typed relation between instances (for example, mechanism \emph{incurs} cost and
 cost \emph{borne by} stakeholder); an \textbf{axiom} denotes a constraint (for
 example, every cost entry specifies at least one bearer and one time horizon);
 and a \textbf{reasoner} denotes an automated checker that validates constraints
-and derives implied facts.
+and derives implied facts \cite{noy2001ontology,gruninger1995methodology}.
 Operationally, this is similar to maintaining a strongly typed schema plus
 integrity constraints, then running consistency checks and canned analytical
 queries. We use ontology tooling because we need explicit semantics for
