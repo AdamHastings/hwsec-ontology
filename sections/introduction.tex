@@ -1,97 +1,122 @@
+%=============================================================
 \section{Introduction}
-Hardware and systems security mechanisms are often evaluated as local technical
-tradeoffs (for example, performance, power, and area versus protection), but
-this view is incomplete. In practice, security costs are distributed across
-stakeholders and across time: a control that looks efficient at design time can
-still shift recurring operations burden, compliance burden, or contingent
-incident loss to other actors later in the lifecycle.
+%=============================================================
 
-This gap creates \emph{allocation opacity}. Architecture teams, operators, and
-policy actors routinely make high-impact choices under uncertainty, yet most
-published evidence is reported as mechanism-local overhead rather than who
-bears which burdens, when they appear, and who receives the benefits. As a
-result, key roles---who decides, who pays, who benefits, and who bears residual
-risk---are often missing from the decision record. In this work, we
-operationalize allocation opacity as missing or untestable burden-allocation
-fields and relations, then evaluate its reduction using executable CQ checks.
 
-Opacity persists in part because it is convenient. Vendors can market
-``secure-by-default'' features while downstream integrators and operators pay
-integration and runtime costs. Organizations can justify controls as
-``required'' without recording the counterfactual---what capability was
-foregone under schedule, die-area, or power constraints. Compliance regimes can
-reward documentation that a control exists more than measurement of its
-marginal overhead or risk reduction. After incidents, ambiguity about whether a
-control was absent, weakly adopted, or bypassed can diffuse accountability.
-These incentive patterns make cost shifting common but hard to see
-\cite{anderson2001economics,anderson2006economics,akerlof1970lemons,hastings2020wac}.
+Every security mechanism hides a distributional question that its designers rarely ask
+explicitly: \emph{who pays?} The performance tax from speculative execution mitigations
+fell almost entirely on cloud operators and datacenter owners who had no role in the
+original microarchitectural design decisions~\cite{kocher2019spectre,koruyeh2022retbleed}.
+The integration burden from capability-based memory safety falls on software
+ecosystems that must retrofit decades of existing code~\cite{woodruff2014cheri}.
+The compliance overhead from trusted boot and firmware resilience requirements falls
+on OEMs navigating certification timelines they did not set~\cite{cooper2018sp800193}.
+In each case, the actor who chose the mechanism, the actor who paid for it, and the
+actor who received its protection are three different parties.
 
-This paper presents an ontology for costs in hardware and systems security,
-framed around the claim that security mechanisms act as
-\emph{burden-allocation instruments}. Here, ``ontology'' can be read as a
-rigorous shared data model: named entity types (mechanisms, stakeholders,
-costs), typed relations between them (incurs, borne by, shifted to, benefits),
-and constraints that prevent common omissions (for example, every cost entry
-must name at least one bearer and one time horizon). The goal is not
-classification for its own sake; the goal is decision support: a representation
-that makes burden pathways and counterfactuals explicit and queryable.
+This is not an occasional anomaly. It is the normal condition of hardware and systems
+security. Security mechanisms are evaluated, selected, and deployed within one
+organizational context while their costs materialize---sometimes years later---in
+another. Yet the tools available for analyzing this situation are poorly matched to it.
+The result is a persistent \emph{fog of war} around security costs: decisions are made
+under allocation opacity, burden pathways are implicit rather than explicit, and the
+question of who bears which costs is rarely part of the formal decision record.
 
-Building on that model, the paper defines an analytical framework that compares
-mechanisms under two decision logics: local-overhead optimization and
-allocation-aware optimization. This makes objective functions, baseline
-assumptions, and transfer/externality terms explicit, so disagreements about
-mechanism choice can be traced to assumptions instead of hidden in prose.
+Two research traditions have been circling this problem without quite converging on it.
 
-The paper then grounds the model in an executable artifact pipeline and a seed
-corpus spanning six mechanism families (speculation controls, TEEs, crypto
-acceleration, rowhammer mitigations, memory-safety mitigations, and reactive
-runtime detection/response), plus incident-linkage tuples. Competency questions
-are used as acceptance tests for visibility, transfer semantics, comparison,
-attribution structure, sensitivity, information-gap ranking, semantic
-consistency checks, and opportunity-cost explicitness.
+\paragraph{The systems engineering tradition} has developed precise methods for
+characterizing the costs of security mechanisms in terms of power, performance, and
+area (PPA), as well as engineering labor, verification effort, and schedule impact. This
+tradition understands that every design choice is a point in a multidimensional tradeoff
+space, that constraints interact, and that opportunity costs are real: die area committed
+to a hardware security feature is die area unavailable for compute, memory bandwidth,
+or energy efficiency. Hardware architects think in these terms habitually. The tradeoff
+space is their natural habitat.
 
-Finally, we report what this seed release establishes and what it does not. It
-establishes methodological feasibility for allocation-aware, ontology-backed
-security-cost analysis; it does not claim final benchmark-grade effect sizes.
-The contribution is therefore a decision framework and executable methodology
-for exposing burden pathways that local-overhead analyses routinely miss.
+What this tradition typically does not model is \emph{where} costs land. A published
+evaluation of a trusted execution environment reports gate-count overhead and
+performance impact on representative workloads~\cite{costan2016sanctum,tsai2017graphenesgx}.
+It does not report who bears the integration cost when an OEM must certify a new
+firmware stack, or who absorbs the operational cost when a cloud provider must
+maintain multiple TEE generations across a heterogeneous fleet. Distribution is
+treated as outside the scope of mechanism evaluation.
 
-\paragraph{Scope.}
-In this paper, security cost includes direct design overhead (area and energy),
-verification and validation effort, software/hardware co-design complexity,
-certification and compliance burden, opportunity cost from constrained design
-space, and post-incident costs (recall, liability, and reputational damage)
-\cite{anderson2001economics,anderson2006economics}. The system boundary covers
-security mechanisms and requirements that affect microarchitecture and SoC
-design, platform firmware and trusted boot chains, supply-chain assurance and
-lifecycle support, reactive detection/recovery pipelines, and product-level
-organizational decision-making.
+\paragraph{The security economics tradition} has developed equally precise methods
+for characterizing the distributional consequences of security decisions: externalities,
+principal-agent misalignment, information asymmetry, and the systematic ways that
+individually rational decisions produce collectively suboptimal outcomes~\cite{anderson2001why,anderson2006economics}.
+This tradition understands that the actor who chooses a security control is often not
+the actor who pays for it, and that this misalignment produces predictable
+underinvestment, cost-shifting, and accountability gaps.
 
-\paragraph{Non-goals.}
-To keep the first version tractable, we do not attempt a full treatment of
-software-only control economics without hardware or firmware coupling,
-geopolitical externalities beyond product and operator contexts, attacker-utility
-modeling in full game-theoretic detail, or jurisdiction-specific legal doctrine
-for liability allocation.
+What this tradition typically does not model is \emph{how} mechanism-level technical
+choices produce specific distributions. The mechanism is treated as a black box: it
+either exists or does not, is adopted or is not. The question of why speculative
+execution controls concentrate recurring burden on cloud operators while memory
+safety mitigations concentrate upfront burden on toolchain integrators---questions
+whose answers are embedded in specific technical properties of the mechanisms
+themselves---is not something the economics toolkit is equipped to answer.
 
-\subsection{Research Questions}
-This paper is guided by four research questions:
+\paragraph{The gap.} Neither tradition, alone, can trace burden pathways \emph{through}
+the mechanism. The engineering toolkit explains what a mechanism costs but not where
+those costs go. The economics toolkit explains where costs end up but not why specific
+technical choices produce specific distributions rather than others. Together, they
+describe the same phenomenon from complementary angles. What is missing is the
+translation layer that makes them commensurable.
+
+\paragraph{This paper.} We propose a synthesis organized around a central reframing:
+\emph{hardware security mechanisms should be understood as burden-allocation
+instruments}---devices that distribute security costs, risks, and residual liabilities
+across stakeholders, organizations, and timescales. This framing is not a replacement
+for either tradition. It is the joint lens that puts them in productive contact.
+
+The synthesis has three components. First, a conceptual argument: we show that the
+engineering concept of a design tradeoff and the economic concept of a cost externality
+are descriptions of the same underlying phenomenon, and that recognizing this
+equivalence changes what questions we ask about mechanism selection. Second, a
+shared vocabulary: grounded in two case studies, we develop the minimum set of
+concepts needed to trace burden pathways through technical mechanisms---concepts
+that map engineering terms onto economic terms and make the translation explicit.
+Third, a demonstration: we show that the combined framework reveals things that
+neither tradition could see alone, specifically, that mechanism properties \emph{determine}
+burden distributions prospectively, not merely retrospectively, and that this has
+concrete implications for mechanism evaluation, procurement, and disclosure.
+
+We ground the argument in two case studies chosen to complement each other. The
+first---speculative execution controls---provides a deep analysis of a single mechanism
+family in which the burden pathway is historically documented and consequential. The
+second---memory safety mechanisms---provides a comparative analysis across four
+technically distinct approaches to the same security objective, stress-testing the
+vocabulary against mechanisms with sharply different burden pathway signatures.
+Together, the case studies show both that the framework is analytically productive and
+that it generalizes across the diversity of hardware and systems security practice.
+
+\paragraph{Contributions.} This paper makes four contributions:
 \begin{itemize}
-  \item \textbf{RQ1}: What cost types are induced by hardware-security mechanisms across the design, deployment, and incident lifecycle?
-  \item \textbf{RQ2}: How should these costs be represented so that stakeholder, time horizon, and uncertainty are explicit?
-  \item \textbf{RQ3}: Which relations are required to reason about risk transfer, externalities, and incentive misalignment?
-  \item \textbf{RQ4}: How can the ontology support comparable instrument-level analysis across mechanisms with different technical overhead and governance context?
+  \item A central reframing of hardware security mechanisms as burden-allocation
+    instruments, synthesizing systems engineering and security economics around a
+    shared unit of analysis.
+  \item An analysis of the structural gap between these two traditions and a diagnosis
+    of why allocation opacity persists despite both traditions' sophistication.
+  \item A shared vocabulary---developed inductively from case studies rather than
+    imposed from above---that makes burden pathways explicit and comparable across
+    mechanisms and stakeholders.
+  \item Two grounded case studies demonstrating that the synthesis reveals mechanism
+    properties that determine burden distributions prospectively, with implications for
+    evaluation, procurement, and policy.
 \end{itemize}
 
-\subsection{Contributions}
-\begin{itemize}
-  \item A central framing claim that hardware security mechanisms should be evaluated as burden-allocation instruments, not only as local technical controls.
-  \item A lifecycle-oriented taxonomy of security costs in hardware, spanning physical resource, engineering process, compliance, strategic, and externality costs.
-  \item A formal ontology design that links mechanisms, threats, stakeholders, cost-bearing pathways, and incident-loss linkage with explicit temporal semantics.
-  \item A multi-stakeholder analytical framing that combines direct implementation costs, expected incident loss, and cost externalization.
-  \item An executable artifact pipeline that regenerates CQ outcomes, sensitivity checks, and VOI priorities from seed datasets with explicit data-origin labels.
-\end{itemize}
+\paragraph{Scope and non-goals.} Our focus is hardware and systems security
+mechanisms: microarchitectural controls, trusted execution environments, memory
+safety hardware, and related platform security features. We do not attempt a full
+treatment of software-only security economics, geopolitical supply-chain externalities,
+or game-theoretic attacker modeling. These are important topics but orthogonal to the
+core synthesis we develop here.
 
-The remainder of the paper reviews prior work, defines the ontology and
-analytical framework, presents evidence-grounded case studies, and evaluates
-coverage and utility against the competency-question set.
+The remainder of the paper proceeds as follows. Section~\ref{sec:traditions} develops
+the two-traditions framing in detail and identifies the specific gap that the synthesis
+addresses. Sections~\ref{sec:spectre} and~\ref{sec:memsafety} present the two case
+studies. Section~\ref{sec:vocabulary} crystallizes the shared vocabulary that the case
+studies reveal as necessary. Section~\ref{sec:synthesis} draws out what the combined
+framework reveals. Section~\ref{sec:limitations} addresses limitations and future work,
+and Section~\ref{sec:conclusion} concludes.

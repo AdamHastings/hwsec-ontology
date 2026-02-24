@@ -18,7 +18,7 @@
 \acmConference[NSPW '26]{New Security Paradigms Workshop}{2026}{TBD}
 \acmBooktitle{Proceedings of the New Security Paradigms Workshop (NSPW '26)}
 
-\title{An Ontology of Costs in Hardware and Systems Security}
+\title{Security as Burden: A Synthesis of Engineering Tradeoffs and Security Economics}
 
 \author{Author Name}
 \affiliation{%
@@ -30,14 +30,27 @@
 
 \begin{document}
 \begin{abstract}
-Security in hardware and computer architecture is often treated as a feature,
-but in practice it manifests as a portfolio of costs: power, performance, die
-area, engineering effort, compliance overhead, schedule delay, and downstream
-reputational or market losses when failures occur. This paper proposes an
-ontology for these costs and advances a central framing: hardware security
-mechanisms should be treated as \emph{burden-allocation instruments}, not only
-as local technical controls. The paper sketches a framework for comparing
-security investments across stakeholders and timescales under this framing.
+Every security mechanism hides a distributional question that its designers rarely ask
+explicitly: \emph{who pays?} The performance tax from speculative execution mitigations
+fell on cloud operators who had no role in the original design decision. The integration
+burden from capability-based memory safety falls on software ecosystems that must
+retrofit decades of code. The compliance overhead from trusted boot requirements falls
+on OEMs navigating certification timelines they did not set. In each case, the technical
+choice and its economic consequence are made by different actors, recorded in different
+documents, and analyzed by different communities---if they are analyzed at all.
+
+This paper argues that this disconnect is not accidental. It is the product of two
+traditions that have been analyzing the same underlying problem with incompatible
+vocabularies: systems engineering, which characterizes the technical tradeoff space with
+precision but treats cost distribution as out of scope, and security economics, which
+understands distribution and incentive misalignment clearly but treats the mechanism
+as a black box. Neither tradition, alone, can explain why a given mechanism produces
+the burden distribution it does---or what alternative designs would have implied a
+different one. We propose a synthesis: a burden-allocation framework in which security
+mechanisms are understood as instruments for distributing costs, risks, and constraints
+across stakeholders and timescales. A lightweight shared vocabulary, grounded in two
+case studies, makes the translation between engineering and economic concepts precise
+enough to be useful in practice.
 \end{abstract}
 
 \maketitle
