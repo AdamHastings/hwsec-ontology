@@ -1,0 +1,244 @@
+%=============================================================
+\section{Two Traditions, One Problem}
+\label{sec:traditions}
+%=============================================================
+
+Hardware security mechanisms are evaluated twice, by two communities
+that rarely compare notes. Systems engineers evaluate them as points in
+a design space: what do they cost in silicon area, power draw, and
+runtime performance, and what do those costs foreclose? Security
+economists evaluate them as instruments of policy: who adopts them,
+who pays for them, and who bears the risk when they fail? Both
+evaluations are rigorous. Both are incomplete. And the gap between
+them is precisely where the fog of war lives.
+
+%-------------------------------------------------------------
+\subsection{The Systems Engineering Lens: Everything is a Tradeoff}
+\label{sec:engineering}
+%-------------------------------------------------------------
+
+Hardware and systems designers operate under a foundational constraint:
+resources are finite and their allocation is zero-sum. Silicon area
+committed to a security feature is area unavailable for compute cores,
+cache capacity, or memory controllers. Power budgeted to always-on
+integrity checking is power unavailable for performance headroom or
+battery life. Engineering time spent on formal verification of a
+security property is engineering time not spent on new functionality
+or performance optimization. This is not a failure of imagination or
+will. It is the structure of the problem.
+
+The discipline that has grown up around this constraint is sometimes
+called \emph{design space exploration}: the systematic characterization
+of how design choices interact, which combinations of objectives are
+simultaneously achievable, and where the Pareto frontier lies. In
+hardware security, this means that every mechanism comes with a
+profile---not a single cost, but a vector of costs and benefits
+distributed across multiple dimensions and multiple points in the
+product lifecycle.
+
+Consider what a hardware architect actually tracks when evaluating a
+security mechanism. At design time: how much die area does it consume,
+and what did that area cost in terms of foregone alternatives? How does
+it affect the power envelope, and under what workload conditions? Does
+it add critical-path latency, and if so, how much clock frequency must
+be sacrificed? What verification burden does it add---how many
+engineer-months of formal analysis, simulation, and penetration testing
+does it require before the design can tape out? At deployment time: does
+it interact with specific workload classes in ways that create
+performance cliffs? Is it always active, or does it engage only under
+specific conditions? Can it be disabled by software, and if so, who
+controls that switch and bears the consequences? At lifecycle time: does
+it require firmware updates as the threat landscape evolves? Does it
+impose certification obligations that must be renewed? When a bypass is
+discovered, who owns the patch and who pays for its deployment?
+
+This is a rich and precise analytical framework. It has produced a
+substantial body of empirical work: measured overhead figures for
+trusted execution environments~\cite{costan2016sanctum,tsai2017graphenesgx},
+characterized performance impacts of speculative execution
+mitigations~\cite{koruyeh2022retbleed,yan2018invisispec}, documented
+area and power costs of hardware memory
+tagging~\cite{arm2021mte}, and traced the
+verification demands of capability
+architectures~\cite{woodruff2014cheri}. Hardware security
+researchers know, with considerable precision, what their mechanisms
+cost in engineering terms.
+
+What this framework does not track is \emph{who bears those costs}.
+The overhead figure exists. The question of which organizational actor
+absorbs it---the chip vendor, the OEM integrating the chip into a
+platform, the cloud operator running workloads on that platform, or
+the enterprise customer whose service degrades---is typically outside
+the scope of the analysis. Distribution is not a variable in the
+design space exploration. It is treated as someone else's problem,
+to be worked out downstream by contracts, markets, and negotiations
+that the engineer neither controls nor models.
+
+This is not a criticism of the engineering tradition. Distribution
+really is outside the scope of mechanism design, in the same way that
+the aerodynamics of a wing are outside the scope of air traffic
+control. The problem arises not from what the engineering tradition
+does, but from what gets lost when its outputs are used to make
+decisions that are implicitly distributional---which, as we will
+argue, is most of them.
+
+%-------------------------------------------------------------
+\subsection{The Security Economics Lens: Distribution is the Point}
+\label{sec:economics}
+%-------------------------------------------------------------
+
+A parallel tradition has been analyzing security decisions through
+an entirely different lens. Security economics starts not from the
+mechanism but from the actors---their incentives, their information,
+and the ways their individually rational decisions interact to produce
+collective outcomes that may be suboptimal for everyone.
+
+The core insight of this tradition is that security is an economic
+problem before it is a technical one~\cite{anderson2001why}. When the
+actor who decides whether to invest in a security control is not the
+actor who bears the cost of a breach, underinvestment is the
+predictable equilibrium---not a mistake, but a rational response to
+misaligned incentives. When buyers cannot verify the security
+properties of products before purchase, markets for security tend
+toward the low end, because vendors who invest in genuine security
+cannot credibly signal that investment to customers who cannot
+evaluate it~\cite{akerlof1970lemons}. When security failures impose
+costs on parties who had no role in the original security
+decision---users whose data is exposed, businesses whose supply chains
+are disrupted, critical infrastructure that depends on compromised
+components---those externalities create a systematic gap between
+private and social returns to security investment~\cite{anderson2006economics}.
+
+These concepts have considerable explanatory power. They explain why
+software vendors historically underinvested in security relative to
+the social optimum: the costs of a breach fell primarily on users,
+not vendors, so vendors faced weak incentives to invest beyond what
+was necessary for reputational or regulatory compliance. They explain
+why security certifications have mixed effectiveness: certification
+can signal a minimum baseline but cannot easily signal the
+\emph{marginal} security value of investment above that baseline, so
+the incentive is to meet the certification bar rather than exceed it.
+They explain why incident disclosure norms matter: when vendors can
+conceal breaches, the reputational cost of poor security investment
+is suppressed, further weakening investment incentives.
+
+In hardware security specifically, the economics lens illuminates
+patterns that pure technical analysis cannot. Why did DRAM vendors
+initially resist deploying rowhammer mitigations that system vendors
+and cloud operators were demanding? Because the costs of the
+vulnerability fell primarily on system integrators and operators, not
+on DRAM vendors whose products were already
+sold~\cite{kim2014flipping,frigo2020trrespass}. Why do OEMs sometimes
+ship platforms with security features disabled by default? Because
+the integration and support costs of enabled features fall on the OEM,
+while the security benefits accrue to end users who may not notice or
+value them. Why is firmware security investment chronically
+underfunded relative to the risk it addresses? Because firmware
+compromise is hard to attribute, liability is diffuse, and the
+reputational cost of a firmware breach often falls on the device brand
+rather than the firmware vendor who introduced the vulnerability.
+
+What the economics lens does not provide is a way to trace these
+distributional outcomes back to specific technical properties of
+the mechanisms involved. The analysis operates at the level of
+actors, incentives, and market structures. The mechanism is a
+parameter---present or absent, adopted or not---rather than an object
+of analysis in its own right. The question of \emph{why} rowhammer
+mitigations concentrate costs on system integrators rather than DRAM
+vendors, and whether alternative mitigation designs would have implied
+a different distribution, is not one the economics toolkit is
+equipped to answer. That answer is embedded in the technical
+properties of the mechanisms themselves: their activation profiles,
+their scope, their interaction with the supply chain boundary between
+DRAM vendor and system integrator. To see it, you need the
+engineering lens. But to know why it matters, you need the economics
+lens.
+
+%-------------------------------------------------------------
+\subsection{The Gap: A Single Mechanism, Two Descriptions}
+\label{sec:gap}
+%-------------------------------------------------------------
+
+To make the gap concrete, consider hardware AES acceleration---a
+dedicated on-chip engine that performs AES encryption and decryption
+in hardware rather than software, present in most modern processors
+and system-on-chip designs.
+
+A hardware architect describing this mechanism would reach for a
+specific set of concepts. The accelerator occupies die area---on the
+order of a few percent of total SoC area in a typical implementation,
+area that could alternatively have been used for additional compute
+capacity or larger caches. It consumes static power when idle and
+dynamic power proportional to utilization. It delivers substantial
+throughput improvements for cryptographic workloads---factors of ten
+to forty times faster than software AES on the same
+platform~\cite{intel2012aesni,xie2024opentitan}---but this benefit
+is workload-conditional: applications that perform little encryption
+see no benefit and pay only the area and static power cost. The
+accelerator has an activation profile: it engages only when the
+cryptographic engine is invoked, rather than imposing overhead
+continuously. Its opportunity cost is specific and nameable: the die
+area it occupies is area not available for, say, a larger last-level
+cache or an additional CPU core, both of which would benefit all
+workloads rather than only cryptographic ones. A chip vendor choosing
+to include a hardware AES accelerator is making a commitment about
+which workload class deserves dedicated silicon resources---a
+commitment with consequences for every customer who buys the chip,
+whether or not they run cryptographic workloads.
+
+A security economist describing the same mechanism would reach for a
+completely different set of concepts. The accelerator changes the cost
+structure of encryption for downstream actors: by reducing the
+performance penalty of strong encryption, it shifts the economic
+calculus toward adoption for system integrators and application
+developers who previously might have avoided encryption on
+performance grounds. This is a positive externality of the hardware
+investment---the chip vendor bears the area and engineering cost, but
+the security benefit accrues to every party whose data is protected
+by applications that now encrypt because the cost of doing so has
+dropped. At the same time, the accelerator creates a subtle
+principal-agent dynamic: the chip vendor who decides to include it
+does not bear the consequence if applications fail to use it. The
+silicon is present; whether it is invoked is a software decision made
+by application developers whose incentives to use strong encryption
+are shaped by factors entirely outside the chip vendor's control.
+There is also a transfer effect in the supply chain: by providing
+hardware acceleration, the chip vendor implicitly shifts
+responsibility for cryptographic correctness toward software---the
+hardware is fast, but the security property depends on correct key
+management, protocol implementation, and algorithm selection, all of
+which are now the application developer's problem rather than a
+constraint the hardware enforces.
+
+These are two precise, detailed, and sophisticated descriptions of the
+same object. They are not in conflict. And yet they do not connect.
+
+The architect's description has no place for ``positive externality,''
+``principal-agent dynamic,'' or ``responsibility transfer.'' The
+economist's description has no place for ``activation profile,''
+``opportunity cost of die area,'' or ``workload-conditional benefit.''
+Each tradition has developed exactly the vocabulary it needs for its
+own analytical purposes, and that vocabulary stops at the boundary of
+the other tradition's domain.
+
+The consequence is that the most important questions about hardware
+AES acceleration cannot be asked within either framework alone.
+\emph{Why} does the vendor bear the area cost while the security
+benefit accrues to end users? Because the activation profile is
+conditional and the scope is module-specific---properties that are
+invisible to the economics lens. \emph{What} would a different design
+imply for the distribution of benefits? An always-on encryption
+engine with mandatory invocation would shift benefit realization
+toward the chip vendor's customers and away from application
+developers' discretion---but evaluating that tradeoff requires
+simultaneously reasoning about technical properties and distributional
+consequences in a way neither tradition currently supports.
+
+This is the gap the present paper addresses. It is not a gap in
+either tradition's sophistication. It is a gap between them---a
+missing translation layer that would allow the precise technical
+characterization of mechanism properties to be connected to the
+precise economic characterization of their distributional consequences.
+The following sections develop that translation layer inductively,
+through case studies chosen to make the gap---and its
+resolution---as concrete as possible.
