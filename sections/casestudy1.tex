@@ -1,0 +1,249 @@
+%=============================================================
+\section{Case Study I: Speculative Execution Controls}
+\label{sec:spectre}
+%=============================================================
+
+Speculative execution attacks are among the most extensively benchmarked
+vulnerabilities in hardware security history. From the initial Spectre and Meltdown
+disclosures in January 2018~\cite{kocher2019spectre} through the subsequent
+wave of variants---Retbleed~\cite{koruyeh2022retbleed}, MDS attacks, and
+others---the research community has produced hundreds of overhead measurements
+with considerable precision. We know, to within a few percentage points, what
+each mitigation costs on which workloads on which microarchitectures.
+
+What the benchmarking literature does not tell us is who paid those costs. That
+question requires a different vocabulary---one that does not yet exist in standard
+form. This case study develops that vocabulary inductively, by first presenting what
+the engineering analysis knows with precision, then what the economics analysis
+observes about distribution, and finally asking what it would take to connect the two.
+
+%-------------------------------------------------------------
+\subsection{Engineering Analysis: What the Benchmarks Know}
+\label{sec:spectre-engineering}
+%-------------------------------------------------------------
+
+Speculative execution is a family of performance-enhancing techniques in which a
+processor executes instructions before it is certain they will be needed, discarding
+the results if the speculation proves wrong. The performance benefit is substantial:
+modern out-of-order processors would be dramatically slower without speculation,
+as the alternative is stalling pipelines waiting for branch outcomes, memory
+latencies, and data dependencies to resolve. The vulnerability, demonstrated by
+Kocher et al.~\cite{kocher2019spectre} and the independent teams behind
+Meltdown~\cite{lipp2018meltdown}, is that the microarchitectural side effects of
+speculative execution---cache state changes, timing variations---are observable even
+when the speculated instructions are ultimately discarded. An attacker can use these
+side effects to read memory they should not have access to.
+
+The mitigations that followed span a wide design space, and their costs have been
+measured extensively.
+
+\paragraph{Software mitigations: Retpoline and IBRS.}
+The first deployed mitigations were software-based. Retpoline replaces indirect
+branches with a return-based trampoline that defeats branch-target injection;
+IBRS (Indirect Branch Restricted Speculation) restricts speculation across privilege
+boundaries. Both impose recurring runtime overhead on every affected system.
+Retbleed, a 2022 variant that bypasses retpoline on AMD and older Intel
+microarchitectures, required additional mitigations whose overhead Wikner and
+Razavi measured at 14--39\% on Linux kernel benchmarks, with a mean of
+approximately 28\% on affected AMD systems~\cite{koruyeh2022retbleed}. Earlier
+IBRS-based mitigations imposed overheads of 10--30\% on system-call-intensive
+workloads, dropping to 2--8\% on compute-bound tasks. These are not edge-case
+numbers: system-call-intensive workloads are the norm in cloud and datacenter
+environments.
+
+\paragraph{Hardware mitigations: speculation barriers and partitioning.}
+Academic proposals explored hardware-level mitigations that prevent speculative
+state from being observable. InvisiSpec~\cite{yan2018invisispec} proposed making
+speculative loads invisible in the cache hierarchy by buffering them until they
+commit; its measured overhead averaged 21\% across SPEC CPU2006 benchmarks,
+compared to 74\% for STT (Speculative Taint Tracking), a more comprehensive
+approach. SafeSpec proposed a similar speculation buffer and reported overheads
+in the 5--20\% range depending on workload memory intensity. These hardware
+proposals traded area and design complexity for better performance than pure
+software mitigations, but they required new microarchitectural structures---
+speculation buffers, commit-time validation logic---that consume die area and add
+verification burden.
+
+\paragraph{Microcode and firmware patches.}
+Intel and AMD both released microcode updates that implemented IBRS, STIBP
+(Single Thread Indirect Branch Predictors), and SSBD (Speculative Store Bypass
+Disable) at the hardware level. These patches required firmware updates propagated
+through OEM and platform vendor supply chains---a deployment mechanism with its
+own latency, cost, and coordination burden that the performance benchmarks do not
+capture at all.
+
+\paragraph{What the benchmarks establish.}
+The picture that emerges from this literature is precise along one dimension and
+silent along another. We know that speculative execution mitigations impose
+\emph{always-on, system-wide, recurring} overhead. The activation profile is
+not conditional or workload-triggered: every system running mitigated software
+pays the cost on every workload, regardless of whether it faces a realistic
+threat from speculative execution attacks. The scope is system-wide: the overhead
+is not isolated to security-sensitive code paths but distributed across the entire
+workload. The overhead is not a one-time engineering cost but a permanent tax on
+every system running the mitigation.
+
+These properties---always-on activation, system-wide scope, recurring timing---are
+not incidental. They follow directly from the nature of the vulnerability: because
+speculation happens everywhere in the pipeline, and because the attacker can observe
+microarchitectural state from unprivileged code, any mitigation that closes the
+channel must either restrict speculation globally or instrument every speculative
+operation. There is no cheap, targeted fix. The engineering analysis tells us this
+with precision. What it does not tell us is who absorbs a permanent 5--28\%
+performance penalty, why that particular actor bears it, or whether a different
+mitigation design could have implied a different distribution.
+
+%-------------------------------------------------------------
+\subsection{Economics Analysis: Where the Costs Landed}
+\label{sec:spectre-economics}
+%-------------------------------------------------------------
+
+The Spectre and Meltdown disclosure produced one of the most publicly documented
+cost-distribution events in hardware security history. Because the vulnerabilities
+affected virtually every major cloud provider simultaneously, and because cloud
+providers must report performance characteristics to enterprise customers, the
+distributional consequences were unusually visible.
+
+\paragraph{Cloud operators absorbed the recurring overhead.}
+The performance penalty from Spectre mitigations fell almost entirely on cloud
+operators---Amazon, Google, Microsoft, and their counterparts---who run the
+workloads affected by always-on mitigations. Google reported performance
+degradation of up to 10\% on production workloads following the initial patches.
+Amazon reported similar impacts, particularly on system-call-intensive workloads
+common in containerized deployments. These operators had no role in the original
+microarchitectural design decisions that created the vulnerability, and no seat at
+the table when Intel, AMD, and ARM decided how to implement mitigations. They
+were notified during a coordinated disclosure period too short to evaluate
+alternatives, and then absorbed a permanent recurring cost that was not of their
+choosing.
+
+\paragraph{CPU vendors bore the engineering and reputational cost.}
+Intel, as the vendor most severely affected (Meltdown was largely an Intel-specific
+vulnerability~\cite{hastings2020wac}), bore substantial engineering costs:
+microcode development, validation, coordinated disclosure management, and the
+longer-term cost of redesigning affected microarchitectural structures in subsequent
+silicon generations. Intel's stock declined approximately 3.5\% on the day of
+disclosure and faced sustained reputational pressure. The in-silicon fixes that
+appeared in later microarchitectures (Whiskey Lake and beyond) represent
+significant design investment---area and verification costs paid upfront by the
+vendor to reduce the recurring overhead borne by operators downstream.
+
+\paragraph{OEMs and platform vendors bore the deployment cost.}
+Propagating microcode and firmware patches through the supply chain required
+coordination across CPU vendors, OEM platform vendors, operating system
+maintainers, and cloud operators. This coordination burden---engineering time,
+testing, certification, deployment orchestration---is entirely absent from the
+benchmark literature. It fell on OEMs and platform vendors who were implementing
+fixes for a vulnerability in a component they did not design, under a timeline
+they did not control, with potential liability for systems that remained unpatched.
+
+\paragraph{End users and enterprises bore residual and indirect costs.}
+Enterprises running on-premises hardware faced a choice: apply patches and absorb
+the performance penalty, or defer patching and accept continued exposure.
+Organizations with performance-sensitive workloads---high-frequency trading,
+scientific computing, database-intensive applications---faced real tradeoffs with
+no good options. End users of cloud services experienced service degradation
+or price increases as operators passed through some portion of their overhead
+costs. The users who were ultimately protected by the mitigations were not,
+in general, the users who paid for them.
+
+\paragraph{What the economics analysis establishes---and does not.}
+The distributional picture is clear in broad strokes: the vulnerability originated
+in CPU vendor design decisions; the engineering fix cost was borne partly by CPU
+vendors and partly by OEMs; the recurring operational cost landed on cloud
+operators; residual risk and indirect costs fell on enterprises and end users. This
+is a textbook case of cost externalization: the actors with the greatest ability
+to have prevented the vulnerability---the CPU vendors---bore only a fraction of
+its total lifecycle cost.
+
+But the economics analysis, on its own, cannot explain \emph{why} this distribution
+emerged from these particular mitigations rather than others. It observes that
+cloud operators paid. It does not connect that observation to the always-on
+activation profile and system-wide scope that made operator-borne recurring overhead
+structurally inevitable given the mitigation approach chosen. It cannot ask: if
+Intel had invested earlier in hardware-level speculation buffers of the InvisiSpec
+variety, would the distribution have looked different? Would the upfront vendor
+cost have been higher but the downstream operator cost lower? That question
+requires simultaneously reasoning about technical mechanism properties and
+distributional consequences---which is precisely what neither tradition alone
+supports.
+
+%-------------------------------------------------------------
+\subsection{What the Synthesis Reveals}
+\label{sec:spectre-synthesis}
+%-------------------------------------------------------------
+
+Placing the two analyses side by side, the gap becomes visible as something
+specific and bridgeable rather than merely a vague interdisciplinary aspiration.
+
+\paragraph{Mechanism properties determine burden pathway signatures.}
+The always-on activation profile of software Spectre mitigations is not an
+accident of implementation---it is a direct consequence of the threat model.
+Because speculative execution is a universal processor behavior, and because
+the attack channel is observable from unprivileged code at any time, there
+is no cheap way to activate mitigations only when under attack. The activation
+profile is always-on by necessity, which means the overhead is recurring by
+necessity, which means whoever runs mitigated workloads continuously absorbs
+the cost. In a cloud environment, that is the operator.
+
+This chain of reasoning---from threat model to activation profile to scope to
+bearer---is invisible in both the benchmark literature and the economics literature
+taken separately. The benchmarks document the overhead without asking who runs
+the workloads. The economics analysis identifies the bearer without asking why
+the mechanism's properties made that bearer structurally inevitable.
+
+\paragraph{Alternative designs imply alternative distributions.}
+InvisiSpec's hardware-level approach~\cite{yan2018invisispec} would have changed
+the burden pathway signature in a specific, traceable way. Its overhead (21\%
+mean) is similar in magnitude to software mitigations but its bearer would have
+been different: the die area and verification cost falls on the CPU vendor at
+design time, as an upfront engineering cost, rather than on the operator as a
+recurring runtime cost. A vendor who invested in InvisiSpec-style hardware would
+have internalized more of the burden at design time and externalized less of it
+to downstream operators.
+
+This is not merely an observation about past decisions. It is a template for
+prospective analysis: given a proposed mitigation, what are its activation profile,
+scope, and workload interaction? Who runs affected workloads continuously? What
+is the upfront vendor cost versus the recurring operator cost? These questions
+can be asked---and partially answered---before deployment, if the vocabulary exists
+to ask them. Currently, it does not.
+
+\paragraph{The concepts the combined analysis requires.}
+Working through this case study, we find that connecting the engineering and
+economics analyses requires a small set of concepts that belong fully to neither
+tradition:
+
+\begin{itemize}
+  \item \textbf{Activation profile}: whether a mechanism's overhead is always-on,
+    conditional on specific operations, or event-triggered. This determines whether
+    the recurring cost is universal or workload-selective.
+  \item \textbf{Scope}: whether overhead is system-wide or isolated to specific
+    modules or workload classes. System-wide scope means operators of any workload
+    pay; module-specific scope means only operators of relevant workloads pay.
+  \item \textbf{Bearer}: the organizational actor who absorbs a given cost instance.
+    Distinguished from the decision-maker (who chose the mechanism) and the
+    beneficiary (who receives the security property).
+  \item \textbf{Timing}: whether a cost is upfront (design time), recurring
+    (every operational period), or contingent (realized only upon an incident).
+    The same total cost has very different distributional implications depending
+    on when it is realized and by whom.
+  \item \textbf{Transfer}: when the actor who bears a cost is different from
+    the actor who made the design decision that incurred it, the cost has been
+    transferred. Transfer can be explicit (contractual) or implicit (structural,
+    as when always-on overhead is transferred to operators by the nature of
+    the mechanism).
+\end{itemize}
+
+These concepts are not exotic. Engineers use some of them informally; economists
+use others under different names. What is missing is their formalization as a
+shared vocabulary that can be applied consistently across mechanisms and
+stakeholders. The benchmark literature could, in principle, report not just overhead
+magnitudes but activation profiles and scopes. Procurement processes could, in
+principle, require disclosure of bearer and transfer structure alongside performance
+figures. Neither currently happens, because the vocabulary to require it does not
+exist in standard form.
+
+The next case study stress-tests these concepts across a family of mechanisms
+with deliberately varied burden pathway signatures, before Section~\ref{sec:vocabulary}
+crystallizes them into a reusable schema.
