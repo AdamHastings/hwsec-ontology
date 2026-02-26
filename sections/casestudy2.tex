@@ -1,0 +1,318 @@
+%=============================================================
+\section{Case Study II: Memory Safety as Comparative Stress Test}
+\label{sec:memsafety}
+%=============================================================
+
+Memory safety is one of the oldest and most persistent problems in systems
+security. Roughly 70\% of critical vulnerabilities in large codebases such as
+Chrome and the Windows kernel have been attributed to memory safety
+failures~\cite{miller2019msrc,chromesecurity2020}. The technical community has
+responded with a wide range of mechanisms---spanning hardware tagging, capability
+architectures, compiler instrumentation, and control flow enforcement---that
+address the same underlying threat but produce dramatically different burden
+pathway signatures.
+
+This is what makes memory safety an ideal stress test for the vocabulary developed
+in Section~\ref{sec:spectre}. Unlike the Spectre case, where a single vulnerability
+class produced a relatively constrained set of mitigation approaches, memory safety
+offers a natural comparative experiment: four technically distinct mechanisms, each
+addressing the same objective, each with a different answer to the question of who
+pays, when, and how much. If the vocabulary can account for all four and reveal
+the distributional logic behind their differences, it is doing real analytical work.
+
+We analyze each mechanism in turn, then draw the comparative conclusions that
+the individual analyses make possible.
+
+%-------------------------------------------------------------
+\subsection{Arm Memory Tagging Extension (MTE)}
+\label{sec:mte}
+%-------------------------------------------------------------
+
+\paragraph{What it is.}
+MTE, introduced in the Armv8.5-A architecture, adds a 4-bit color tag to each
+16-byte granule of memory and a corresponding tag to each pointer. On every
+memory access, hardware checks that the pointer tag matches the allocation tag;
+a mismatch raises a fault. This provides deterministic detection of heap and stack
+buffer overflows and use-after-free errors with no false positives, at the cost of
+additional tag storage and per-access check overhead.
+
+\paragraph{Engineering analysis.}
+The hardware cost of MTE falls on the chip vendor. Tag storage requires
+approximately 3\% additional DRAM capacity (one tag byte per 16 data bytes) and
+modest on-die tag cache structures. The memory bus must carry tag bits alongside
+data, increasing interconnect complexity. Arm's own guidance reports runtime
+overhead of approximately 1--5\% for tag-checking in typical workloads, with
+memory overhead of roughly 3\%~\cite{arm2021mte}. The activation profile is
+conditional: MTE can be enabled or disabled per memory region, and checking
+overhead is incurred only on tagged allocations. Scope is therefore
+workload-selective rather than system-wide---applications that opt into MTE pay
+the overhead; those that do not are unaffected.
+
+The verification burden at the chip vendor is non-trivial: MTE requires correctness
+guarantees about tag propagation across the memory hierarchy, interaction with
+cache coherence protocols, and behavior under speculative execution. These are
+novel design constraints that add engineering labor and validation cost at tape-out.
+
+\paragraph{Burden pathway.}
+The vendor bears the upfront hardware cost: die area, interconnect complexity,
+verification effort. The integrator---OEM or platform vendor---bears the firmware
+and software stack cost of enabling and configuring MTE. The operator or developer
+bears a conditional recurring overhead only if they opt into MTE for their
+allocations. End users bear no direct cost but benefit from reduced vulnerability
+exposure in MTE-enabled applications.
+
+Crucially, the \emph{decision} to use MTE is made at multiple points in the
+stack. The chip vendor decides to include the hardware. The OS vendor decides
+whether to support it in the allocator. The application developer decides whether
+to enable it for their heap. The security benefit accrues only when all three
+decisions align---a coordination problem that the hardware overhead figures do
+not capture.
+
+%-------------------------------------------------------------
+\subsection{CHERI Capability Architecture}
+\label{sec:cheri}
+%-------------------------------------------------------------
+
+\paragraph{What it is.}
+CHERI~\cite{woodruff2014cheri} replaces conventional pointers with
+hardware-enforced capabilities: fat pointers that carry bounds, permissions, and
+a validity tag checked on every dereference. A CHERI processor cannot be made
+to dereference an out-of-bounds or revoked pointer; the hardware enforces the
+constraint unconditionally. This provides substantially stronger memory safety
+guarantees than MTE---spatial and temporal safety for all pointer operations,
+not just allocation boundaries---but at a fundamentally different cost structure.
+
+\paragraph{Engineering analysis.}
+CHERI requires a complete redesign of the ISA: every pointer becomes a 128-bit
+capability (double the width of a 64-bit address), every pointer operation requires
+capability manipulation instructions, and the memory system must track and check
+validity tags pervasively. The hardware overhead is significant: approximately
+2$\times$ memory bandwidth for capability-wide pointer operations in naive
+implementations, with optimized implementations achieving closer to 10--40\%
+overhead on memory-intensive workloads. But the hardware cost is, in a meaningful
+sense, the smaller part of the burden.
+
+The dominant cost of CHERI is \emph{ecosystem migration}. Every piece of software
+that manipulates pointers---which is essentially all systems software---must be
+ported to the CHERI ABI. Existing code that plays tricks with pointer representations,
+stores metadata in unused pointer bits, or relies on pointer arithmetic that
+exceeds allocation bounds will not run correctly on CHERI without modification.
+The CheriBSD project, which ports FreeBSD to CHERI, has invested years of
+engineering effort and remains incomplete for the full software ecosystem. CHERI's
+own evaluation literature acknowledges migration costs measured in engineer-years
+for non-trivial codebases~\cite{woodruff2014cheri}.
+
+\paragraph{Burden pathway.}
+The hardware vendor bears substantial upfront design cost: ISA redesign,
+microarchitectural changes throughout the pipeline, verification of capability
+semantics. But this upfront cost is dwarfed, in aggregate, by the integration
+burden it imposes on the software ecosystem. Every operating system vendor,
+every systems library maintainer, every application developer who wants to run
+on CHERI must invest in migration. The burden falls on integrators and developers
+in proportion to their software's complexity and its reliance on low-level pointer
+manipulation---precisely the code that is most security-critical and most
+expensive to modify.
+
+The timing structure is unusual: the upfront vendor cost is large but bounded;
+the ecosystem migration cost is diffuse, long-tail, and potentially unbounded,
+accumulating across thousands of independent software projects over years or
+decades. A benchmark measuring CHERI's hardware overhead captures perhaps
+10\% of the total burden the mechanism imposes on the ecosystem.
+
+The beneficiary structure is also unusual: the strongest safety guarantees accrue
+only when the \emph{entire} software stack is ported to CHERI. Partial adoption
+produces partial guarantees. This means the security benefit is non-linear in
+adoption, while the migration cost is roughly linear---a distributional structure
+that creates strong incentives for free-riding and late adoption.
+
+%-------------------------------------------------------------
+\subsection{Compiler-Based Mitigations: AddressSanitizer and SafeStack}
+\label{sec:asan}
+%-------------------------------------------------------------
+
+\paragraph{What they are.}
+AddressSanitizer (ASan) instruments memory operations at compile time to detect
+out-of-bounds accesses and use-after-free errors via shadow memory. SafeStack
+separates the stack into safe (return addresses and function pointers) and unsafe
+(everything else) regions to prevent stack-based control flow hijacking. Both
+are compiler passes that require no hardware changes; their overhead is paid
+entirely in software.
+
+\paragraph{Engineering analysis.}
+ASan imposes approximately 2$\times$ memory overhead (shadow memory) and
+50--100\% runtime overhead in instrumented builds~\cite{serebany2012asan}---costs
+that make it suitable for testing and debugging but not production deployment at
+scale. SafeStack's overhead is much lower, typically 1--3\%, because it only
+instruments stack operations. Neither mechanism requires any hardware investment;
+the entire cost is borne at compile time (toolchain integration) and runtime
+(instrumented execution).
+
+The activation profile is entirely developer-controlled: instrumentation is a
+compiler flag. This means the mechanism is not deployed unless a developer or
+operator explicitly enables it, and its protection is absent in any build that
+does not include the flag. There is no system-wide enforcement; protection is
+opt-in and therefore uneven across the software ecosystem.
+
+\paragraph{Burden pathway.}
+The hardware vendor bears zero cost. The chip vendor who ships a processor without
+MTE or CHERI can point to ASan as evidence that memory safety tooling exists,
+while bearing none of its cost. The toolchain maintainer (LLVM, GCC) bears the
+engineering cost of implementing and maintaining the instrumentation pass. The
+developer bears the integration cost of enabling and maintaining instrumented
+builds, and the operator bears the runtime overhead of any production deployment.
+
+The distributional consequence of opt-in deployment deserves emphasis. Because
+ASan is not mandatory, its benefits are realized only in software whose developers
+chose to enable it, maintained the instrumented build pipeline, and accepted the
+overhead. Security-critical infrastructure maintained by under-resourced teams---
+precisely the software most likely to harbor exploitable memory errors---is the
+least likely to have ASan enabled in production. The mechanism design implicitly
+transfers the cost of memory safety to those most willing to pay it, which is not
+the same as those most in need of it.
+
+%-------------------------------------------------------------
+\subsection{Hardware Control Flow Integrity: Arm BTI and Intel CET}
+\label{sec:cfi}
+%-------------------------------------------------------------
+
+\paragraph{What they are.}
+Arm Branch Target Identification (BTI) and Intel Control-flow Enforcement
+Technology (CET) are hardware mechanisms that restrict indirect branch targets
+to explicitly marked locations, preventing attackers from redirecting control flow
+to arbitrary code gadgets (return-oriented programming and jump-oriented
+programming attacks). Both are ISA extensions that require hardware support,
+OS integration, and compiler toolchain updates to be effective.
+
+\paragraph{Engineering analysis.}
+The hardware cost of BTI and CET is modest relative to CHERI: both require
+small additions to the instruction decode and branch prediction units to check
+and enforce landing pad constraints, plus shadow stack hardware in the case of
+CET's return address protection. Intel reports CET overhead of 1--4\% on
+typical workloads; Arm reports similar figures for BTI. The activation profile
+is conditional: protection applies only to code compiled with BTI/CET support
+and running on an OS that enforces the constraints. Legacy binaries without
+BTI/CET annotations run without protection, creating a mixed-trust environment
+during the transition period.
+
+\paragraph{Burden pathway.}
+The hardware vendor bears a modest upfront cost---ISA extension design,
+microarchitectural changes, verification. The OS vendor bears integration cost:
+kernel changes to enable enforcement, shadow stack management, compatibility
+handling for legacy binaries. The compiler toolchain maintainer bears the cost
+of annotating generated code with landing pad markers. The developer bears the
+cost of rebuilding with updated compilers and testing for compatibility regressions.
+
+The transition burden deserves particular attention. During the period between
+hardware availability and ecosystem-wide adoption---which, for CET, has stretched
+across multiple years since its introduction in Tiger Lake processors---the
+protection is partial. An attacker who can load a legacy binary into a
+CET-enabled process can still use that binary's gadgets for return-oriented
+programming. The overhead of the transition period falls on operators who must
+manage mixed-trust environments, and on security teams who must reason about
+partial protection guarantees that are harder to analyze than either full
+protection or no protection.
+
+%-------------------------------------------------------------
+\subsection{Comparative Analysis: Same Objective, Different Burden Signatures}
+\label{sec:memsafety-comparison}
+%-------------------------------------------------------------
+
+Table~\ref{tab:memsafety} summarizes the burden pathway signatures of the four
+mechanisms using the vocabulary developed in Section~\ref{sec:spectre}.
+
+\begin{table*}[t]
+\centering
+\caption{Memory safety mechanisms compared under burden-allocation vocabulary.
+Bearer abbreviations: V = chip Vendor, I = Integrator/OEM, D = Developer,
+O = Operator, U = end User.}
+\label{tab:memsafety}
+\small
+\begin{tabular}{lllllll}
+\toprule
+Mechanism & Activation & Scope & Primary bearer & Upfront cost & Recurring cost & Transfer pattern \\
+\midrule
+Arm MTE & Conditional & Workload-selective & V (hardware), D (adoption) & Medium & Low--Medium & Vendor $\to$ developer (opt-in) \\
+CHERI & Always-on (if adopted) & System-wide & V + ecosystem & Very high & Medium & Vendor $\to$ ecosystem (migration) \\
+ASan / SafeStack & Opt-in & Build-selective & D, O & Low & High (ASan) / Low (SafeStack) & Toolchain $\to$ developer \\
+Arm BTI / Intel CET & Conditional & Binary-selective & V, I, D & Medium & Very low & Vendor $\to$ integrator (transition) \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+The comparison reveals several patterns that neither the benchmark literature
+nor the economics literature surfaces on its own.
+
+\paragraph{Activation profile determines who pays the recurring cost.}
+MTE and BTI/CET are conditional: overhead is incurred only on tagged or annotated
+code paths. ASan is opt-in: overhead is incurred only in instrumented builds.
+CHERI, once adopted, is always-on: the capability-wide pointer representation
+is universal. This means CHERI's recurring cost is borne by every operator of
+every workload on a CHERI system, while ASan's recurring cost is borne only by
+developers and operators who choose instrumented builds. Same security objective;
+completely different recurring cost distribution.
+
+\paragraph{Scope determines the breadth of the burden.}
+ASan's protection is build-selective: a process either runs with ASan or without
+it. BTI/CET's protection is binary-selective: individual binaries either have
+landing pad annotations or do not. MTE's protection is allocation-selective:
+individual memory regions either have tags or do not. CHERI's protection is
+system-wide: all pointer operations on a CHERI system are capability-checked.
+Broader scope means stronger guarantees but also broader cost distribution ---
+CHERI's stronger protection comes with costs distributed across the entire
+software ecosystem, not just security-conscious developers.
+
+\paragraph{The upfront/recurring split reflects who made the design decision.}
+CHERI concentrates enormous upfront cost on the hardware vendor and the
+migration cost on the ecosystem. The hardware vendor's decision to pursue CHERI
+creates a liability for every software maintainer whose code must be ported.
+This is a large, implicit, unilateral transfer: the vendor chooses the architecture,
+and the ecosystem bears the migration burden. MTE concentrates upfront cost
+on the vendor but transfers the recurring adoption decision to developers, who
+can opt in or not. ASan transfers the upfront cost away from hardware entirely,
+placing it on toolchain maintainers and developers. BTI/CET distributes upfront
+cost across vendor, OS, toolchain, and developer in a staged transition.
+
+\paragraph{Opt-in mechanisms transfer burden to those willing to pay, not
+those most in need.}
+This is perhaps the sharpest distributional finding of the comparison. Both
+ASan and MTE (in its opt-in deployment model) transfer the decision to adopt
+memory safety to developers and operators. This means the burden of memory
+safety is borne by those who choose to bear it---which correlates with
+security-consciousness, resources, and sophistication, not with the actual
+distribution of vulnerability or risk. The most security-critical but
+under-resourced software in the ecosystem is least likely to run with ASan
+enabled or MTE opted in. The mechanism design inadvertently produces an
+inequitable distribution of protection.
+
+\paragraph{What the benchmarks miss.}
+The overhead figures for these four mechanisms---1--5\% for MTE, 10--40\% for
+CHERI in memory-intensive workloads, 50--100\% for ASan, 1--4\% for BTI/CET---
+are real and important. But they are silent on everything that matters for
+understanding how security burden is actually distributed: who bears each
+component of the cost, what the opt-in and coordination dynamics are, how the
+transition period creates partial-protection regimes that are harder to reason
+about than either full protection or none, and how the upfront/recurring split
+interacts with the organizational boundary between chip vendor, OS vendor,
+toolchain maintainer, developer, and operator.
+
+A procurement decision based solely on benchmark overhead would treat MTE
+and BTI/CET as roughly equivalent (both 1--5\% overhead) and both as vastly
+preferable to CHERI (10--40\%) or ASan (50--100\%). But under burden-allocation
+analysis, the four mechanisms have radically different total cost structures,
+different distributions of who bears each component, and different implications
+for ecosystem-wide security coverage. The benchmark-only view does not just
+undercount the cost---it systematically misattributes it.
+
+\paragraph{Vocabulary confirmed and extended.}
+The five concepts identified in the Spectre case study---activation profile,
+scope, bearer, timing, and transfer---account for the observed variation across
+all four memory safety mechanisms. The comparative analysis adds one refinement:
+the distinction between \emph{bilateral transfer} (where a specific downstream
+actor is identifiably burdened by an upstream design decision, as in CHERI's
+ecosystem migration) and \emph{diffuse transfer} (where the burden falls on
+whoever chooses to adopt, as in ASan's opt-in deployment). This distinction
+matters for accountability: bilateral transfer creates a traceable liability
+pathway, while diffuse transfer disperses accountability across the ecosystem
+in a way that is harder to contest or correct.
+
+The next section crystallizes these concepts into a reusable schema.
