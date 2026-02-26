@@ -1,0 +1,328 @@
+%=============================================================
+\section{What the Synthesis Reveals}
+\label{sec:synthesis}
+%=============================================================
+
+The vocabulary developed in Section~\ref{sec:vocabulary} is only useful if it
+reveals things that existing analyses miss. This section demonstrates that it
+does, in three ways. First, two worked examples --- secure boot and hardware
+random number generation --- show the vocabulary applied to mechanisms not
+previously analyzed in this paper, producing burden-pathway analyses that
+neither the engineering nor the economics tradition would generate alone.
+Second, we draw out the general claim that the case studies and examples
+support: mechanism properties determine burden distributions prospectively,
+not merely retrospectively. Third, we argue that allocation opacity is not
+only a consequence of disciplinary fragmentation --- it is sometimes actively
+maintained, because it is convenient for certain actors, and the vocabulary
+makes that convenience visible.
+
+%-------------------------------------------------------------
+\subsection{Worked Example 1: Secure Boot and Firmware Integrity}
+\label{sec:secureboot}
+%-------------------------------------------------------------
+
+\paragraph{What it is.}
+Secure boot is a chain-of-trust mechanism that verifies the cryptographic
+signature of each stage of the boot process before executing it: firmware
+verifies the bootloader, the bootloader verifies the OS kernel, and so on.
+NIST SP 800-193~\cite{cooper2018sp800193} defines a related set of platform
+firmware resiliency requirements that extend this to detection and recovery.
+Secure boot is mandated or strongly recommended in a growing number of
+regulatory and procurement contexts, including US federal procurement
+requirements and major cloud provider security baselines.
+
+\paragraph{Engineering analysis.}
+The hardware cost of secure boot falls on the chip vendor: a root of trust
+requires a hardware security module or equivalent trusted execution anchor,
+cryptographic acceleration for signature verification, and protected storage
+for root keys. These are non-trivial design investments but well-characterized
+in the literature. Boot time increases by tens to hundreds of milliseconds
+depending on the depth of the verification chain and the size of the firmware
+images being verified. The activation profile is always-on in a meaningful
+sense: verification occurs at every boot, though not during normal operation.
+Scope is system-wide: a failure in the chain of trust affects the entire
+platform, not a specific workload.
+
+What the engineering analysis does not capture is the key provisioning and
+lifecycle management infrastructure that secure boot requires to function. A
+hardware root of trust is useless without a certificate hierarchy, a key
+management process, and a revocation mechanism. These are not hardware costs ---
+they are organizational and operational costs that the vendor's design decision
+implicitly creates for downstream actors.
+
+\paragraph{Burden pathway analysis.}
+Applying the vocabulary:
+
+\begin{itemize}
+  \item \textbf{Chip vendor} (decision-maker, bearer of design cost):
+    incurs physical resource costs (silicon area for the hardware security
+    module, cryptographic engine) and engineering process costs (verification
+    of the root of trust, certification). These are upfront costs realized
+    at the design phase.
+
+  \item \textbf{OEM or platform integrator} (bearer of integration cost):
+    must provision keys into the hardware root of trust at manufacturing time,
+    maintain the certificate hierarchy across product generations, implement
+    firmware update mechanisms that preserve chain-of-trust integrity, and
+    manage key revocation when vulnerabilities are discovered. These are
+    engineering process and operational costs realized at the integration
+    and operation phases. Critically, these costs are \emph{bilaterally
+    transferred} from the chip vendor's design decision to the OEM: the
+    vendor's choice to include a hardware root of trust creates a mandatory
+    key management obligation for every OEM who integrates the chip.
+
+  \item \textbf{Enterprise customer} (bearer of operational and compliance cost):
+    must manage device enrollment, certificate lifecycle, and boot policy
+    configuration across a potentially large fleet. In regulated industries,
+    must demonstrate compliance with firmware integrity requirements to auditors.
+    These operational and compliance costs are realized at the operation phase
+    and are transferred bilaterally from the regulatory mandate (Authority as
+    decision-maker) to the enterprise as bearer.
+
+  \item \textbf{End user} (beneficiary, residual risk holder): receives the
+    security property --- protection against persistent firmware compromise ---
+    but has no visibility into whether secure boot is correctly implemented
+    or whether the key management infrastructure is sound. The beneficiary
+    and the residual risk holder are the same party, but neither the decision-
+    maker nor the bearer.
+\end{itemize}
+
+\paragraph{What the synthesis reveals.}
+The secure boot burden pathway is a cascade of bilateral transfers: the chip
+vendor's design decision transfers key management obligations to OEMs; the
+regulatory mandate transfers compliance obligations to enterprises; and the
+security benefit is received by end users who bear none of the cost and have
+no mechanism to verify the quality of what they are receiving.
+
+This cascade is invisible to both traditions taken separately. The engineering
+literature characterizes the hardware root of trust and boot-time verification
+overhead. The economics literature notes that regulatory mandates can shift
+costs downstream. But neither connects the specific technical architecture of
+secure boot --- the fact that a hardware root of trust requires an external
+key provisioning infrastructure that the chip vendor cannot supply unilaterally
+--- to the specific organizational actors who end up bearing the provisioning
+and lifecycle management burden. The vocabulary makes that connection explicit
+and traceable.
+
+A procurement officer evaluating two secure boot implementations with similar
+hardware overhead figures would, under local-overhead analysis, treat them as
+equivalent. Under burden-allocation analysis, the question becomes: what key
+management obligations does each implementation transfer to the buyer, and what
+does lifecycle management cost over the platform's operational life? Those
+questions can be asked prospectively, before purchase, if the schema fields
+exist to require them.
+
+%-------------------------------------------------------------
+\subsection{Worked Example 2: Hardware Random Number Generation}
+\label{sec:hrng}
+%-------------------------------------------------------------
+
+\paragraph{What it is.}
+A hardware random number generator (HRNG) uses physical entropy sources ---
+thermal noise, shot noise, or other quantum phenomena --- to produce
+cryptographically unpredictable random bits. HRNGs are present in most modern
+processors (Intel's RdRand/RdSeed, AMD's equivalent, Arm's TRNG) and are
+used as entropy sources for cryptographic key generation, nonce production,
+and randomness-dependent protocols throughout the software stack.
+
+\paragraph{Engineering analysis.}
+The hardware cost of an HRNG falls entirely on the chip vendor: entropy source
+design, conditioning circuitry, health testing logic, and the interface to the
+instruction set. These are modest in area terms but non-trivial in verification
+terms: the statistical properties of the entropy source must be validated, and
+the conditioning pipeline must be shown not to introduce bias or predictability.
+The activation profile is conditional: the HRNG is invoked only when software
+requests random bits, imposing no always-on overhead. Scope is narrow: the
+HRNG affects only workloads that request random numbers.
+
+\paragraph{Burden pathway analysis.}
+Applying the vocabulary:
+
+\begin{itemize}
+  \item \textbf{Chip vendor} (decision-maker, bearer of design cost): incurs
+    physical resource and engineering process costs at the design phase.
+    The vendor also bears a significant but often unacknowledged
+    \emph{strategic cost}: the security of every cryptographic operation
+    performed by every piece of software on the platform depends on the
+    quality of the entropy source. If the entropy source is compromised ---
+    whether by design flaw, implementation error, or deliberate backdoor ---
+    the damage propagates silently through the entire cryptographic ecosystem.
+    The vendor internalizes the design cost but externalizes this systemic
+    risk to every downstream actor.
+
+  \item \textbf{Developer} (bearer of integration cost, decision-maker for
+    usage): must correctly invoke the HRNG, verify that it is available on
+    the target platform, implement fallback paths for platforms where it is
+    absent or fails health testing, and avoid common misuse patterns (such
+    as seeding a software PRNG from a single RdRand call without appropriate
+    conditioning). These are engineering process costs realized at the
+    integration phase. The developer is both the bearer of the integration
+    cost and a secondary decision-maker: the chip vendor provides the
+    hardware, but whether it is used correctly is entirely the developer's
+    decision.
+
+  \item \textbf{End user} (beneficiary, residual risk holder): the security
+    property --- cryptographic unpredictability --- accrues entirely to the
+    end user, who has no ability to verify the quality of the entropy source,
+    no visibility into whether the developer used it correctly, and no
+    recourse if the randomness is weak or compromised. The beneficiary
+    and residual risk holder are the same party, as in the secure boot case,
+    but the distance between them and any decision-maker is even greater.
+\end{itemize}
+
+\paragraph{What the synthesis reveals.}
+The HRNG burden pathway exposes an accountability gap that is structurally
+different from the Spectre or memory safety cases. In those cases, the burden
+pathway was visible --- cloud operators knew they were absorbing Spectre
+mitigation overhead, and CHERI adopters knew they were paying migration costs.
+In the HRNG case, the most consequential cost is \emph{invisible to its bearer}.
+End users who depend on cryptographic operations for the security of their data,
+communications, and transactions have no mechanism to verify the quality of
+the entropy that underlies those operations. The residual risk holder cannot
+observe the risk they hold.
+
+This is not merely an information asymmetry in the Anderson sense --- a
+situation where one party knows more than another. It is a structural feature
+of the mechanism's design: the security property is realized deep in hardware,
+the developer interface abstracts away the entropy source, and the user
+interface abstracts away the developer's choices. Each layer of abstraction
+is individually sensible; together they produce a situation where the party
+with the most to lose has the least ability to evaluate what they are receiving.
+
+The Intel RdRand controversy of 2019 --- in which a microcode bug caused the
+instruction to return a constant value on certain processors, undermining any
+cryptographic operation that relied on it exclusively --- illustrates precisely
+this failure mode~\cite{amd_rng_errata}. Systems running affected processors
+generated predictable keys for an unknown period. End users whose security
+depended on those keys had no way of knowing their risk had changed.
+
+The vocabulary makes this accountability gap nameable and therefore arguable:
+the \textbf{benefits} relation points to end users; the \textbf{borne\_by}
+relation for the strategic/systemic risk points to the same end users; but
+the \textbf{decided\_by} relation points entirely to the chip vendor and the
+developer, neither of whom bears the consequence of a failure. This is a
+specific, contestable claim about the mechanism's distributional structure ---
+one that neither the benchmark literature (which reports throughput and latency
+of RdRand calls) nor the economics literature (which operates at market rather
+than mechanism level) currently makes.
+
+%-------------------------------------------------------------
+\subsection{Mechanism Properties Determine Distributions Prospectively}
+\label{sec:prospective}
+%-------------------------------------------------------------
+
+The four case studies and two worked examples support a general claim that
+is the paper's central analytical contribution: \emph{mechanism properties
+determine burden distributions prospectively, not merely retrospectively}.
+
+This claim has two parts. The first is descriptive: the burden pathway of a
+security mechanism is not an accident of market conditions or organizational
+politics that could only be observed after the fact. It is a structural
+consequence of specific technical choices --- activation profile, scope,
+the location of key management obligations, the abstraction layers between
+entropy source and user --- that could in principle be analyzed before
+deployment. The Spectre mitigation costs that fell on cloud operators were
+predictable from the always-on, system-wide activation profile of the chosen
+mitigations, given the organizational structure of cloud computing. The CHERI
+migration costs that fall on software ecosystems are predictable from the
+ISA-wide scope of capability enforcement and the distribution of pointer-
+manipulating code across the software stack.
+
+The second part is normative: because distributions are prospectively
+determinable, mechanism evaluation that reports only local overhead is not
+merely incomplete --- it is evaluating the wrong thing. A mechanism that
+imposes modest local overhead but transfers large operational costs to downstream
+actors is not a cheap mechanism; it is a mechanism whose costs have been
+externalized from the measurement context. Reporting only what is measured
+is not neutral; it systematically favors mechanisms that externalize costs
+over mechanisms that internalize them, because externalized costs are invisible
+in standard benchmarks.
+
+This has a concrete implication for how the research community reports results.
+A benchmark paper that reports the overhead of a security mechanism without
+reporting its activation profile, scope, and bearer structure is not providing
+incomplete information --- it is providing information that actively misleads
+procurement and adoption decisions by making externalized-cost mechanisms look
+cheaper than they are.
+
+%-------------------------------------------------------------
+\subsection{Allocation Opacity is Sometimes Convenient}
+\label{sec:opacity}
+%-------------------------------------------------------------
+
+The fog of war around security costs is partly a consequence of disciplinary
+fragmentation --- the two traditions simply do not share vocabulary. But it is
+also, in part, maintained. Opacity has beneficiaries, and those beneficiaries
+have incentives to preserve it.
+
+Consider what allocation transparency would require of vendors. A chip vendor
+who discloses the full burden pathway of a security mechanism --- including the
+key management obligations transferred to OEMs, the operational costs
+transferred to cloud operators, and the systemic risks externalized to end
+users --- is providing information that procurement processes could use to
+negotiate, demand changes, or choose alternatives. Opacity forecloses those
+negotiations before they begin. A vendor who can present a benchmark figure
+and a certification status, without disclosing transfer structure, has
+structurally advantaged themselves in procurement conversations.
+
+The same dynamic operates at the regulatory level. Compliance regimes that
+reward the presence of a control without measuring its burden distribution
+create incentives to adopt controls that impose high downstream costs while
+satisfying the compliance requirement. A regulation that mandates secure boot
+without specifying the key management obligations it transfers to integrators
+and enterprises is a regulation that can be satisfied on paper while
+externalizing its real cost to actors who had no say in the requirement.
+
+Hastings and Sethumadhavan~\cite{hastings2020wac} observed that hardware
+security failures persist because market forces allow those best positioned
+to fix problems to avoid paying for them. The vocabulary makes a more specific
+version of this claim: the mechanism by which cost avoidance operates is
+allocation opacity, and allocation opacity is produced and maintained by the
+absence of a shared schema that makes bearer, transfer, and timing fields
+mandatory. The fog of war is not an accident; it is, in part, a product.
+
+This does not require assuming bad faith on the part of vendors or regulators.
+Opacity can be maintained by convention, by the absence of standards, and by
+the path dependence of reporting norms that were established before
+burden-allocation analysis existed as a framework. But recognizing that opacity
+has beneficiaries changes the political economy of adopting the vocabulary:
+requiring burden-allocation disclosure in benchmarks, procurement, and
+regulatory requirements is not a neutral technical improvement. It is a
+redistribution of informational power that will be resisted by actors who
+currently benefit from the fog.
+
+%-------------------------------------------------------------
+\subsection{Implications}
+\label{sec:implications}
+%-------------------------------------------------------------
+
+The synthesis has three concrete implications for practice.
+
+\paragraph{For mechanism evaluation and benchmarking.}
+Benchmark papers should report activation profile and scope alongside overhead
+magnitude, and should identify the organizational bearer of the measured
+overhead. A benchmark measured on a single-tenant research cluster does not
+transfer to a multi-tenant cloud environment where the bearer is an operator
+rather than a developer. Reporting context as well as magnitude is the minimum
+change required to make benchmark results burden-allocation-aware.
+
+\paragraph{For procurement.}
+Hardware security procurement should require burden-allocation disclosure
+alongside performance specifications: who absorbs recurring operational cost,
+what integration obligations are transferred to the buyer, what contingent
+costs are retained by the vendor versus externalized, and what the key
+management or ecosystem obligations are over the platform's operational life.
+The worked examples show that two mechanisms with similar benchmark overhead
+can have radically different total burden structures when transfer and timing
+are accounted for.
+
+\paragraph{For standards and regulation.}
+Regulatory requirements should specify not only which security mechanisms are
+mandated but what their bearer structure must be. A mandate that requires a
+control without constraining who bears its cost creates an incentive to adopt
+the cheapest-to-vendor implementation, which is typically the one that
+externalizes the most cost downstream. Burden-allocation-aware regulation
+would require that controls not impose unreasonable obligations on actors
+who had no role in the regulatory process --- a principle analogous to the
+regulatory concept of proportionality, applied to distributional rather than
+aggregate cost.

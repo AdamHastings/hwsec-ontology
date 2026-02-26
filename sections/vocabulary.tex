@@ -1,0 +1,306 @@
+%=============================================================
+\section{A Burden-Allocation Vocabulary}
+\label{sec:vocabulary}
+%=============================================================
+
+The two case studies were not chosen to illustrate a pre-built framework.
+They were chosen to reveal, inductively, what concepts are necessary to connect
+the engineering and economics analyses of the same mechanisms. By the end of
+Section~\ref{sec:spectre}, five concepts had emerged as load-bearing: activation
+profile, scope, bearer, timing, and transfer. By the end of
+Section~\ref{sec:memsafety}, those five had proven sufficient to account for
+four mechanisms with sharply different burden pathway signatures, with one
+refinement: the bilateral/diffuse distinction within transfer.
+
+This section crystallizes those concepts into a reusable schema. The vocabulary
+is not a translation between two languages that happen to use different words for
+the same things. It fills gaps that neither tradition currently has words for at
+all. The engineering tradition has precise terms for mechanism costs but no terms
+for where those costs go. The economics tradition has precise terms for who bears
+costs but no terms for why specific technical properties produce specific
+distributions. The vocabulary provides the missing concepts in both directions
+simultaneously --- which is what makes it a synthesis rather than a glossary.
+
+We present it as a structured set of entity types, typed relations, and
+constraints: precise enough to support consistent analysis across mechanisms and
+stakeholders, light enough that practitioners in either tradition can apply it
+without specialist ontology tooling. Those who wish to encode it formally in
+OWL 2 DL will find the mapping straightforward; that encoding is a companion
+artifact rather than a burden on the main text.
+
+%-------------------------------------------------------------
+\subsection{The Missing Slots}
+\label{sec:vocab-motivation}
+%-------------------------------------------------------------
+
+The fog of war around hardware security costs persists not primarily because
+the two traditions use different words, but because they report different
+\emph{fields}. A benchmark paper fills in: mechanism name, workload, overhead
+magnitude, hardware platform. It does not fill in: who bears the overhead,
+under what organizational conditions, for how long, and as a consequence of
+whose decision. An economics analysis fills in: which actor ended up paying,
+what incentive misalignment explains this. It does not fill in: which specific
+technical properties of the mechanism made this distribution structurally
+likely, and whether an alternative design would have implied a different one.
+
+Neither set of missing fields is exotic. Both are answerable given the right
+vocabulary. The reason they go unfilled is that no shared schema defines them
+as required --- so they are omitted not because they are unknown but because
+there is no standard slot to put them in.
+
+A vocabulary, in this sense, is a commitment about what information is
+relevant and what omissions are meaningful. A schema that requires every cost
+entry to name a bearer, a decision-maker, a lifecycle phase, and a transfer
+structure makes it impossible to report overhead without answering the
+distributional question. The fog of war is cleared not by more benchmarks but
+by changing what any analysis is required to say.
+
+%-------------------------------------------------------------
+\subsection{Entity Types}
+\label{sec:entities}
+%-------------------------------------------------------------
+
+The vocabulary requires four entity types.
+
+\paragraph{Security Mechanism.}
+A technical control implemented in hardware, firmware, or system software that
+reduces the exploitability of a threat or the impact of a successful attack.
+Mechanisms are the primary unit of analysis. Each mechanism carries two
+engineering properties that the case studies showed to be analytically
+essential: \textbf{activation profile} (always-on, conditional, or opt-in)
+and \textbf{scope} (system-wide, module-specific, or workload-selective).
+These are not incidental implementation details --- they are the engineering
+inputs that determine burden pathway signatures, as the Spectre and memory
+safety case studies demonstrated. A mechanism description that omits them
+cannot support burden-allocation analysis.
+
+\paragraph{Cost Instance.}
+A specific, attributable reduction in objective value caused by adopting,
+operating, or omitting a security mechanism. Cost instances are the atomic
+units of burden-allocation analysis. A mechanism may have many cost
+instances --- one for each combination of cost type, bearer, and lifecycle
+phase. The central design commitment of this entity type is that a cost
+instance without a named bearer is \emph{incomplete}: it reports an overhead
+without answering who absorbs it. This is the field the benchmark literature
+systematically omits.
+
+\paragraph{Stakeholder.}
+An organizational actor who bears, decides, or benefits from a cost instance.
+The vocabulary separates four roles that are frequently conflated but analytically
+distinct:
+\begin{itemize}
+  \item \textbf{Decision-maker}: the actor whose design or deployment choice
+    incurred the cost.
+  \item \textbf{Bearer}: the actor who absorbs the cost in practice.
+  \item \textbf{Beneficiary}: the actor who receives the security property the
+    mechanism provides.
+  \item \textbf{Residual risk holder}: the actor who bears the consequences if
+    the mechanism fails or is bypassed.
+\end{itemize}
+
+Separating these roles is where the vocabulary does its most important work.
+In the Spectre case, the decision-maker (CPU vendor), the bearer (cloud
+operator), the beneficiary (end user), and the residual risk holder (enterprise
+customer) are four different parties. The economics tradition observes the
+bearer; the engineering tradition models the decision-maker's constraints.
+Neither tradition has a standard way to represent all four roles simultaneously
+and ask what happens when they diverge. The vocabulary does.
+
+Concrete stakeholder classes in hardware security include: chip vendor, OEM
+or platform integrator, cloud or datacenter operator, enterprise customer,
+end user or public, standards body or regulator, and software ecosystem
+(toolchain maintainers, OS vendors, application developers considered
+collectively).
+
+\paragraph{Lifecycle Phase.}
+The point at which a cost is realized: \textbf{design} (during hardware or
+software development); \textbf{integration} (when incorporating the mechanism
+into a platform); \textbf{operation} (recurring costs during normal use); and
+\textbf{incident} (contingent costs upon a security failure). Lifecycle phase
+interacts with bearer in ways the benchmark literature cannot capture: the same
+mechanism may have its design costs borne by the vendor, its integration costs
+by the OEM, its operational costs by the operator, and its incident costs by
+the enterprise customer --- four different actors across four phases, none of
+whom appears in a standard overhead figure.
+
+%-------------------------------------------------------------
+\subsection{Cost Taxonomy}
+\label{sec:cost-taxonomy}
+%-------------------------------------------------------------
+
+Cost instances are typed across five categories. The taxonomy is motivated
+by the case studies: each category corresponds to a class of costs that
+appeared in the analysis and that existing reporting frameworks handle poorly
+or not at all.
+
+\textbf{Physical resource costs}: die area, power, memory bandwidth, latency.
+These are what the benchmark literature measures most precisely and what the
+economics literature treats as a black box.
+
+\textbf{Engineering process costs}: labor and time in design, verification,
+toolchain development, or ecosystem migration. CHERI's dominant cost is in
+this category; it is entirely absent from hardware performance benchmarks.
+
+\textbf{Operational costs}: recurring costs during system use --- runtime
+performance overhead, patch deployment and maintenance, key management,
+monitoring infrastructure. Spectre mitigation costs fall here; the benchmark
+literature measures their magnitude but not their bearer.
+
+\textbf{Compliance and governance costs}: audit effort, certification cycles,
+documentation obligations, contractual liability. Largely invisible in the
+technical literature; significant in real procurement decisions.
+
+\textbf{Strategic and externality costs}: opportunity costs, reputational
+exposure, market effects, and costs imposed on parties outside the direct
+decision chain. The opportunity cost of die area committed to MTE rather than
+cache capacity falls here, as does Intel's reputational exposure from Meltdown.
+These costs are the most consequential for long-run ecosystem dynamics and the
+least represented in either tradition's standard analysis.
+
+%-------------------------------------------------------------
+\subsection{Core Relations}
+\label{sec:relations}
+%-------------------------------------------------------------
+
+Relations are where the vocabulary does its analytical work --- they are the
+typed links that make burden pathways traceable rather than merely nameable.
+Six relations are required.
+
+\medskip
+\noindent\textbf{incurs}(\textit{mechanism}, \textit{cost instance}): a
+mechanism gives rise to a cost. Every cost must be traceable to the mechanism
+that incurred it.
+
+\medskip
+\noindent\textbf{borne\_by}(\textit{cost instance}, \textit{stakeholder}):
+a cost is absorbed by a stakeholder in the bearer role. This is the relation
+most consistently absent from existing technical evaluations. A cost instance
+without a \textbf{borne\_by} relation is, by the vocabulary's constraints,
+an incomplete analysis.
+
+\medskip
+\noindent\textbf{decided\_by}(\textit{cost instance}, \textit{stakeholder}):
+the decision that incurred this cost was made by this stakeholder. When
+\textbf{decided\_by} $\neq$ \textbf{borne\_by}, a transfer has occurred.
+This relation is what the economics tradition tracks under the heading of
+principal-agent misalignment; the vocabulary makes it explicit and
+mechanism-specific rather than a general market observation.
+
+\medskip
+\noindent\textbf{benefits}(\textit{cost instance}, \textit{stakeholder}):
+the security property purchased by this cost accrues to this stakeholder.
+When \textbf{benefits} $\neq$ \textbf{borne\_by}, the mechanism produces a
+cross-subsidy: one actor pays for another's protection. This is the relation
+that makes the opt-in deployment problem visible: ASan's diffuse transfer
+means the actors who pay for memory safety are not the actors most in need
+of it.
+
+\medskip
+\noindent\textbf{realized\_at}(\textit{cost instance}, \textit{lifecycle phase}):
+the cost is realized at this phase. Combined with \textbf{borne\_by}, this
+identifies not just who pays but when --- essential for comparing mechanisms
+whose costs have the same magnitude but different timing structures.
+
+\medskip
+\noindent\textbf{transferred\_to}(\textit{cost instance}, \textit{stakeholder}):
+used when \textbf{decided\_by} $\neq$ \textbf{borne\_by} to name the transfer
+target explicitly and annotate its type:
+\begin{itemize}
+  \item \textbf{Bilateral transfer}: the transfer target is a specific,
+    identifiable actor whose burden is traceable to the originating decision.
+    CHERI's ecosystem migration cost is bilateral: the hardware vendor's
+    architectural decision created an identifiable liability for software
+    maintainers.
+  \item \textbf{Diffuse transfer}: the burden falls on whoever opts into the
+    mechanism, dispersing accountability across the ecosystem with no traceable
+    path back to the originating decision. ASan's opt-in deployment is diffuse:
+    no specific actor is responsible for whether any given software project runs
+    with memory safety instrumentation.
+\end{itemize}
+
+This distinction matters beyond taxonomy. Bilateral transfer creates a
+contestable liability pathway --- an actor who bears a cost can identify who
+created it and potentially seek redress or renegotiation. Diffuse transfer
+dissolves accountability: the burden is real but unattributable, which is
+precisely the condition under which it tends to fall on actors with the least
+capacity to resist it.
+
+%-------------------------------------------------------------
+\subsection{Constraints}
+\label{sec:constraints}
+%-------------------------------------------------------------
+
+A vocabulary without constraints is a glossary. The constraints define what
+a \emph{complete} burden-allocation analysis looks like --- and therefore
+make omissions visible as omissions rather than as absences.
+
+\begin{enumerate}
+  \item Every cost instance must have at least one \textbf{borne\_by} relation.
+    A cost without a named bearer is an incomplete analysis, not a cost-free
+    mechanism.
+  \item Every cost instance must have a \textbf{realized\_at} lifecycle phase.
+    Undated costs cannot be compared across mechanisms with different timing
+    structures.
+  \item Every cost instance must have a \textbf{decided\_by} relation. This
+    forces identification of who made the choice that incurred the cost ---
+    the precondition for asking whether decision and burden are aligned.
+  \item When \textbf{decided\_by} $\neq$ \textbf{borne\_by}, a
+    \textbf{transferred\_to} relation must be present with transfer type
+    annotated. Transfer is not an exceptional observation; it is a structural
+    feature to be reported when present.
+  \item Every mechanism must declare an activation profile and a scope. These
+    are the engineering inputs that determine burden pathway signatures and
+    must be reported alongside overhead magnitudes.
+\end{enumerate}
+
+The constraints are intentionally minimal. They do not require precise cost
+quantification --- many hardware security costs are genuinely hard to measure,
+and demanding quantification would make the schema unusable. What they require
+is \emph{attribution}: every cost connected to a bearer, a decision-maker, a
+timeline, and a transfer structure. Attribution without magnitude is vastly
+more useful than magnitude without attribution, because attribution is what
+makes the distributional question answerable at all.
+
+%-------------------------------------------------------------
+\subsection{What the Vocabulary Exposes That Neither Tradition Could}
+\label{sec:vocab-exposes}
+%-------------------------------------------------------------
+
+It is worth pausing to be explicit about what the vocabulary adds beyond
+what either tradition provides on its own --- since the case for a synthesis
+stands or falls on this question.
+
+The engineering tradition, applied alone to Spectre mitigations, tells you
+that the overhead is 5--28\%, always-on, system-wide. It cannot tell you who
+bears that overhead in a multi-tenant cloud environment, why the decision-maker
+(CPU vendor) and the bearer (cloud operator) are different parties, or whether
+an alternative mitigation design would have produced a different distribution.
+Those questions are outside its scope by design.
+
+The economics tradition, applied alone to Spectre, tells you that cloud
+operators bore costs created by CPU vendor decisions, that this reflects
+principal-agent misalignment, and that information asymmetry delayed the
+market response. It cannot tell you why the always-on activation profile
+and system-wide scope made operator-borne recurring overhead structurally
+inevitable given the chosen mitigation approach, or what specific engineering
+alternatives would have changed the distribution. Those answers require
+opening the black box.
+
+The vocabulary, applied to Spectre, connects these: the always-on activation
+profile (engineering concept, now a required schema field) is the causal
+mechanism that produces the recurring externality (economics concept) borne
+by operators (schema field: bearer). The chain from design choice to
+distributional outcome is now explicit and traversable. And crucially, the
+chain runs in both directions: prospectively, a designer can ask what activation
+profile a proposed mitigation implies and therefore who will bear its recurring
+cost; retrospectively, an analyst can ask why the costs landed where they did
+and trace the answer to specific technical decisions.
+
+This bidirectionality --- prospective as well as retrospective analysis --- is
+what neither tradition alone supports and what the vocabulary makes possible.
+It is also what makes the vocabulary a practical tool rather than a post-hoc
+description: the burden pathway can be analyzed before deployment, not only
+after.
+
+The following section demonstrates this in a worked example, then draws out
+the broader implications.
