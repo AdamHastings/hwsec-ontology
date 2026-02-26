@@ -1,0 +1,81 @@
+%=============================================================
+\section{Limitations and Future Work}
+\label{sec:limitations}
+%=============================================================
+
+This paper establishes a conceptual framework and demonstrates its analytical
+productivity across six mechanisms. It does not claim to have finished the job.
+Several limitations are worth stating explicitly, both to bound the contribution
+honestly and to identify the most productive directions for follow-on work.
+
+\paragraph{Inductive scope.}
+The vocabulary was developed inductively from a small number of case studies ---
+speculative execution controls, four memory safety mechanisms, secure boot, and
+hardware random number generation. The concepts that emerged as load-bearing
+(activation profile, scope, bearer, timing, transfer, and the bilateral/diffuse
+distinction) may not be sufficient to account for the full breadth of hardware
+security mechanisms. Mechanisms with unusual deployment models, novel supply
+chain structures, or emerging threat contexts may require additional entity
+types or relations. The vocabulary should be treated as a well-motivated
+starting point, not a finished taxonomy.
+
+\paragraph{Data availability.}
+Many of the most consequential burden terms are proprietary or unobserved.
+Vendor engineering costs, OEM integration costs, enterprise operational costs,
+and incident response expenditures are rarely disclosed in forms that support
+rigorous analysis. The schema can be partially populated from public sources ---
+benchmark papers, incident reports, regulatory filings --- but a complete
+burden-allocation analysis for any real mechanism would require primary data
+from vendors and integrators who have strong incentives not to provide it.
+This is not a flaw in the vocabulary; it is a reflection of the same allocation
+opacity the vocabulary is designed to expose. But it does mean that the
+worked examples in this paper are illustrative rather than exhaustive, and that
+empirical validation of the framework will require either cooperative disclosure
+or natural experiments where costs become visible involuntarily.
+
+\paragraph{Attacker modeling.}
+The vocabulary models burden distribution among defenders --- vendors, integrators,
+operators, users, and regulators --- but does not model attacker costs or the
+strategic interaction between defenders and attackers. Hastings and
+Sethumadhavan~\cite{hastings2020wac} include attackers as a fourth player whose
+cost-bearing is a legitimate policy lever; our framework sets this aside
+deliberately to keep the scope tractable. A fuller treatment would incorporate
+attacker economics --- the cost of exploitation, the value of attack targets,
+and the asymmetries between offense and defense --- into the burden-allocation
+model. This is a meaningful omission for mechanisms whose design explicitly
+aims to raise attacker cost, such as hardware-enforced control flow integrity.
+
+\paragraph{Temporal dynamics.}
+The vocabulary represents burden pathways as relatively static structures,
+but real burden distributions shift over time. The Spectre mitigation burden
+on cloud operators will diminish as in-silicon fixes propagate through the
+installed base; CHERI's ecosystem migration cost will shift as software
+toolchains mature; secure boot's key management burden will evolve as
+automation improves. The current schema captures lifecycle phases but does
+not model how burden distributions change as mechanisms age, as bypasses are
+discovered, or as the ecosystem adapts. A dynamic extension of the vocabulary
+would support longitudinal analysis and strengthen the prospective claim.
+
+\paragraph{Formal encoding.}
+The vocabulary is presented here in structured prose and semi-formal notation.
+A full OWL 2 DL encoding would enable automated consistency checking,
+entailment-based inference, and interoperability with existing cybersecurity
+ontologies such as UCO and D3FEND. This encoding is a natural next artifact
+but is beyond the scope of the present paper. The conceptual commitments
+necessary to produce it are fully specified here; the encoding itself is
+straightforward for practitioners familiar with description logic tooling.
+
+\paragraph{Future work.}
+The most productive near-term directions are three. First, empirical validation:
+applying the schema to a broader corpus of mechanisms using primary data from
+vendors, integrators, and operators, ideally in a context where disclosure
+incentives are aligned --- such as a procurement process that requires
+burden-allocation transparency as a condition of evaluation. Second, procurement
+tooling: translating the schema into a practical disclosure template that
+procurement officers can require vendors to complete, analogous to a
+nutritional label for security mechanism costs. Third, regulatory application:
+engaging with standards bodies such as NIST, JEDEC, and relevant IEEE working
+groups to incorporate burden-allocation fields into existing evaluation and
+certification frameworks. The last of these is the highest-leverage intervention
+--- if burden-allocation disclosure becomes a standard reporting requirement,
+the fog of war begins to clear not by persuasion but by mandate.
