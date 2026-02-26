@@ -1,11 +1,56 @@
+%=============================================================
 \section{Conclusion}
-Security in hardware is not merely an additive technical feature; it is a
-cross-layer allocation of resources, constraints, and risk. A cost ontology can
-make these allocations explicit and comparable, enabling more coherent
-engineering and policy decisions. The paradigm contribution of this paper is to
-make that allocation explicit and contestable by framing hardware security
-mechanisms as burden-allocation instruments: mechanism evaluation should report
-who pays, who benefits, and who bears residual risk, not only local overhead.
-Future work should broaden mechanism coverage, complete incident-loss linkage,
-and test whether allocation-aware reasoning changes real procurement and design
-decisions at scale.
+\label{sec:conclusion}
+%=============================================================
+
+Hardware security mechanisms are not neutral technical controls. They are
+instruments that distribute costs, risks, and residual liabilities across
+stakeholders, organizations, and timescales --- and they do so as a direct
+consequence of specific design choices that could, in principle, have been
+made differently. The performance tax from Spectre mitigations did not
+accidentally fall on cloud operators; it fell there because the always-on,
+system-wide activation profile of the chosen mitigations made operator-borne
+recurring overhead structurally inevitable given the organizational structure
+of cloud computing. The ecosystem migration burden of CHERI did not
+accidentally fall on software maintainers; it fell there because capability-
+wide pointer enforcement requires every piece of pointer-manipulating code
+to be ported, and that code lives in the ecosystem, not in the vendor's
+design team.
+
+These distributions are not mysteries. They are readable from the technical
+properties of the mechanisms themselves, once you have the vocabulary to
+read them. That vocabulary is what this paper provides.
+
+The synthesis we have developed brings together two traditions that have been
+analyzing the same phenomenon from incompatible angles. The systems engineering
+tradition characterizes mechanism costs with precision but treats distribution
+as outside its scope. The security economics tradition characterizes
+distribution clearly but treats the mechanism as a black box. Neither can
+trace burden pathways through the mechanism --- from specific technical design
+choices to specific distributional outcomes. The burden-allocation vocabulary
+fills the gaps in both traditions simultaneously: it gives the engineering
+analysis the distributional concepts it lacks, and gives the economics analysis
+the mechanism-level causal structure it lacks.
+
+The result is not merely a richer description of what has already happened.
+It is a framework for prospective analysis: given a proposed mechanism, what
+activation profile does it imply, what scope, and therefore who will bear its
+recurring cost? What integration obligations does it transfer to downstream
+actors, and are those actors the ones who made the decision? What systemic
+risks does it externalize to parties who have no visibility into the quality
+of what they are receiving? These questions can be asked before deployment,
+and they should be --- by designers, by procurement officers, by regulators,
+and by the research community that produces the benchmark literature on which
+all of them rely.
+
+The fog of war around hardware security costs is real, consequential, and
+partly maintained. It persists because the two traditions that could together
+dispel it have not been in conversation, and because the actors who benefit
+from opacity have little incentive to supply the missing vocabulary voluntarily.
+Clearing it requires not only the conceptual framework this paper provides but
+the institutional will to require burden-allocation disclosure as a standard
+condition of evaluation, procurement, and certification.
+
+Hardware security is not just an engineering problem and not just an economics
+problem. It is both, simultaneously, and the failure to treat it as both is
+why the costs keep ending up somewhere unexpected.
