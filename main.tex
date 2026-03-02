@@ -30,27 +30,20 @@
 
 \begin{document}
 \begin{abstract}
-Every security mechanism hides a distributional question that its designers rarely ask
-explicitly: \emph{who pays?} The performance tax from speculative execution mitigations
-fell on cloud operators who had no role in the original design decision. The integration
-burden from capability-based memory safety falls on software ecosystems that must
-retrofit decades of code. The compliance overhead from trusted boot requirements falls
-on OEMs navigating certification timelines they did not set. In each case, the technical
-choice and its economic consequence are made by different actors, recorded in different
-documents, and analyzed by different communities---if they are analyzed at all.
+Hardware security mechanisms are burden-allocation instruments: their technical
+properties determine who pays for security, when, and how much---as a direct
+consequence of design choices that could have been made differently. This reframing
+exposes a systematic flaw in standard evaluation practice. Benchmark reporting
+measures local overhead precisely but says nothing about where costs land; the
+result systematically favors mechanisms that externalize costs over mechanisms
+that internalize them, because externalized costs are invisible in overhead figures.
 
-This paper argues that this disconnect is not accidental. It is the product of two
-traditions that have been analyzing the same underlying problem with incompatible
-vocabularies: systems engineering, which characterizes the technical tradeoff space with
-precision but treats cost distribution as out of scope, and security economics, which
-understands distribution and incentive misalignment clearly but treats the mechanism
-as a black box. Neither tradition, alone, can explain why a given mechanism produces
-the burden distribution it does---or what alternative designs would have implied a
-different one. We propose a synthesis: a burden-allocation framework in which security
-mechanisms are understood as instruments for distributing costs, risks, and constraints
-across stakeholders and timescales. A lightweight shared vocabulary, grounded in two
-case studies, makes the translation between engineering and economic concepts precise
-enough to be useful in practice.
+We develop this argument through a synthesis of systems engineering and security
+economics---two traditions that analyze the same mechanisms with incompatible
+vocabularies and complementary blind spots---and ground it in six case studies
+spanning speculative execution controls, memory safety, secure boot, and hardware
+random number generation. The product is a semi-formal burden-allocation vocabulary
+that makes cost pathways explicit, attributable, and analyzable before deployment.
 \end{abstract}
 
 \maketitle
